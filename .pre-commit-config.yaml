@@ -18,6 +18,11 @@ repos:
     entry: flake8 --count
     language: python
     types: [python]
+  - id: mypy
+    name: Running mypy
+    entry: mypy
+    language: python
+    types: [python]
   - id: commitizen
     name: Running commitizen
     entry: cz check --commit-msg-file
