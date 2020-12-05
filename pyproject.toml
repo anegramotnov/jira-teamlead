@@ -4,8 +4,12 @@ version = "0.1.0"
 description = ""
 authors = ["Aleksey Negramotnov <aleksey.negramotnov@nedra.digital>"]
 
+[tool.poetry.scripts]
+jira = "jira_teamlead.__main__:cli"
+
 [tool.poetry.dependencies]
 python = "^3.6.1"
+click = "^7.1.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
