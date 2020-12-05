@@ -10,6 +10,7 @@
 !.editorconfig
 !.pre-commit-config.yaml
 !.mypy.ini
+!.flake8
 
 ## VSC
 !.gitattributes
