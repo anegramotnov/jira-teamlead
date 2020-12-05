@@ -5,12 +5,11 @@
 .*
 
 # Don't ignore
-## Samples
-!.env.example
 
 ## Code style
 !.editorconfig
 !.pre-commit-config.yaml
+!.mypy.ini
 
 ## VSC
 !.gitattributes
