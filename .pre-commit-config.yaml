@@ -8,6 +8,11 @@ repos:
     entry: isort
     language: python
     types: [python]
+  - id: black
+    name: Running black
+    entry: black
+    language: python
+    types: [python]
   - id: flake8
     name: Running flake8
     entry: flake8 --count
