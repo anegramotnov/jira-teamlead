@@ -1,7 +1,7 @@
 import click
 import pytest
 
-from jira_teamlead.__main__ import validate_jira_host, validate_user
+from jira_teamlead.cli import validate_jira_host, validate_user
 
 
 @pytest.mark.parametrize("value", ("", "lol", "lol:wut:lol", ":lol", "wut:", "лол:што"))

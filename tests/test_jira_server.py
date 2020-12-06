@@ -1,6 +1,6 @@
 import pytest
 
-from jira_teamlead.__main__ import JiraServer
+from jira_teamlead.jira import JiraServer
 
 
 def test_auth_header():
