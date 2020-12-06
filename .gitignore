@@ -12,6 +12,7 @@
 !.mypy.ini
 !.flake8
 !.isort.cfg
+!.coveragerc
 
 ## VSC
 !.gitattributes
