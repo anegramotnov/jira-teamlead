@@ -1,0 +1,9 @@
+[run]
+branch = true
+parallel = true
+source = jira_teamlead/
+omit = ["tests/*"]
+
+[report]
+fail_under = 80
+
