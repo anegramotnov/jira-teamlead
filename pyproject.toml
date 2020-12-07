@@ -12,6 +12,7 @@ python = "^3.6.1"
 click = "^7.1.2"
 requests = "^2.25.0"
 jira = "^2.0.0"
+python-dotenv = "^0.15.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

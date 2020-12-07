@@ -38,11 +38,20 @@ def validate_jira_host(ctx: click.Context, param: click.Parameter, value: str) -
 @click.group()
 def cli() -> None:
     """Инструмент автоматизации работы в Jira."""
+    import dotenv
+
+    dotenv.load_dotenv(verbose=True)
 
 
 @cli.command()
-@click.option("-jh", "--jira-host", required=True, callback=validate_jira_host)
-@click.option("-u", "--user", required=True, callback=validate_user)
+@click.option(
+    "-jh",
+    "--jira-host",
+    required=True,
+    callback=validate_jira_host,
+    envvar="JT_JIRA_HOST",
+)
+@click.option("-u", "--user", required=True, callback=validate_user, envvar="JT_USER")
 @click.option("-p", "--project", required=True, type=str)
 @click.option("-t", "--type", "issue_type", required=True, type=str)
 @click.option("-s", "--summary", required=True, type=str)
@@ -66,8 +75,14 @@ def create_issue(
 
 
 @cli.command()
-@click.option("-jh", "--jira-host", required=True, callback=validate_jira_host)
-@click.option("-u", "--user", required=True, callback=validate_user)
+@click.option(
+    "-jh",
+    "--jira-host",
+    required=True,
+    callback=validate_jira_host,
+    envvar="JT_JIRA_HOST",
+)
+@click.option("-u", "--user", required=True, callback=validate_user, envvar="JT_USER")
 @click.option("--dry-run", is_flag=True)
 @click.argument("issues_source_file", type=click.File("r", encoding="utf-8"))
 def create_issues(
@@ -90,8 +105,16 @@ def create_issues(
 
 
 @cli.command()
-@click.option("-jh", "--jira-host", required=True, callback=validate_jira_host)
-@click.option("-u", "--user", "auth", required=True, callback=validate_user)
+@click.option(
+    "-jh",
+    "--jira-host",
+    required=True,
+    callback=validate_jira_host,
+    envvar="JT_JIRA_HOST",
+)
+@click.option(
+    "-u", "--user", "auth", required=True, callback=validate_user, envvar="JT_USER"
+)
 @click.option("-p", "--project", required=True, type=str)
 @click.argument("username", type=str, required=False)
 def find_user(
@@ -100,7 +123,7 @@ def find_user(
     project: str,
     username: str,
 ) -> None:
-    jira = jira_lib.JIRA(jira_host, get_server_info=False, basic_auth=auth)
+    jira = jira_lib.JIRA(jira_host, basic_auth=auth)
 
     users = jira.search_assignable_users_for_issues(username=username, project=project)
 
