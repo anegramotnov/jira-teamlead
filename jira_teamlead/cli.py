@@ -50,10 +50,10 @@ def cli() -> None:
     "--server",
     required=True,
     callback=validate_jira_server,
-    envvar="JT_JIRA_SERVER",
+    envvar="JTL_SERVER",
 )
 @click.option(
-    "-a", "--auth", required=True, callback=validate_jira_auth, envvar="JT_JIRA_AUTH"
+    "-a", "--auth", required=True, callback=validate_jira_auth, envvar="JTL_AUTH"
 )
 @click.option("-p", "--project", required=True, type=str)
 @click.option("-t", "--type", "issue_type", required=True, type=str)
@@ -83,10 +83,10 @@ def create_issue(
     "--server",
     required=True,
     callback=validate_jira_server,
-    envvar="JT_JIRA_SERVER",
+    envvar="JTL_SERVER",
 )
 @click.option(
-    "-a", "--auth", required=True, callback=validate_jira_auth, envvar="JT_JIRA_AUTH"
+    "-a", "--auth", required=True, callback=validate_jira_auth, envvar="JTL_AUTH"
 )
 @click.argument("issue_set_file", type=click.File("r", encoding="utf-8"))
 def create_issue_set(
@@ -117,10 +117,10 @@ def create_issue_set(
     "--server",
     required=True,
     callback=validate_jira_server,
-    envvar="JT_JIRA_SERVER",
+    envvar="JTL_SERVER",
 )
 @click.option(
-    "-a", "--auth", required=True, callback=validate_jira_auth, envvar="JT_JIRA_AUTH"
+    "-a", "--auth", required=True, callback=validate_jira_auth, envvar="JTL_AUTH"
 )
 @click.option("-p", "--project", required=True, type=str)
 @click.argument("username", type=str, required=False)

@@ -19,8 +19,8 @@
     jira --help
     ```
 * Общие параметры всех команд можно передавать через переменные окружения или .env-файл:
-    * `--jira-server`: `JT_JIRA_SERVER`
-    * `--auth`: `JT_JIRA_AUTH`
+    * `--server`: `JTL_SERVER`
+    * `--auth`: `JTL_AUTH`
 
 ## Функциональность
 
