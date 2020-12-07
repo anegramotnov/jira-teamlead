@@ -102,7 +102,8 @@ def create_issues(
         click.echo(f"Created issue: {jira_host}/browse/{created_issue.key}")
 
 
-# TODO: Вынести общие параметры с envvar в отдельный декоратор
+# TODO: Вынести общие параметры с envvar в отдельный декоратор,
+#       который прокинет готовый экземпляр jira
 @cli.command()
 @click.option(
     "-jh",
