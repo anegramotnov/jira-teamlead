@@ -25,7 +25,7 @@ def test_search_users(JIRA_MOCK, runner):
     jira_mock.search_users.return_value = [user_1]
 
     result = runner.invoke(
-        search_users, ["-js", "http://lol.wut", "-a", "lol:wut", "-p", "LOL"]
+        search_users, ["-js", "http://lol.wut", "-ja", "lol:wut", "-p", "LOL"]
     )
     assert result.exit_code == 0
     assert result.output == "test (Test test, email at lol dot wut)\n"
@@ -47,7 +47,7 @@ def test_create_issue(JIRA_MOCK, runner):
         [
             "-js",
             "http://lol.wut",
-            "-a",
+            "-ja",
             "lol:wut",
             "-p",
             "LOL",
@@ -93,7 +93,7 @@ def test_create_issues(JIRA_MOCK, runner):
 
         result = runner.invoke(
             create_issue_set,
-            ["-js", "http://lol.wut", "-a", "lol:wut", "test_issues.yaml"],
+            ["-js", "http://lol.wut", "-ja", "lol:wut", "test_issues.yaml"],
         )
         assert result.exit_code == 0
         assert result.output == "Created issue: http://lol.wut/browse/LOL-1\n"

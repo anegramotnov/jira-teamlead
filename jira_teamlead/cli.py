@@ -1,5 +1,5 @@
 import io
-from typing import Tuple
+from typing import Callable, Tuple
 from urllib.parse import urlparse
 
 import click
@@ -36,31 +36,43 @@ def validate_jira_server(ctx: click.Context, param: click.Parameter, value: str)
     return f"{url.scheme}://{url.netloc}"
 
 
+common_options = (
+    click.option(
+        "-js",
+        "--server",
+        required=True,
+        callback=validate_jira_server,
+        envvar="JTL_SERVER",
+    ),
+    click.option(
+        "-ja", "--auth", required=True, callback=validate_jira_auth, envvar="JTL_AUTH"
+    ),
+)
+
+
+def add_common_options(command: Callable) -> Callable:
+    for option in reversed(common_options):
+        command = option(command)
+    return command
+
+
 @click.group()
 def cli() -> None:
-    """Инструмент автоматизации работы в Jira."""
+    """Инструмент автоматизации создания Issue в Jira."""
     import dotenv
 
     dotenv.load_dotenv(verbose=True)
 
 
 @cli.command()
-@click.option(
-    "-js",
-    "--server",
-    required=True,
-    callback=validate_jira_server,
-    envvar="JTL_SERVER",
-)
-@click.option(
-    "-a", "--auth", required=True, callback=validate_jira_auth, envvar="JTL_AUTH"
-)
+@add_common_options
 @click.option("-p", "--project", required=True, type=str)
 @click.option("-t", "--type", "issue_type", required=True, type=str)
 @click.option("-s", "--summary", required=True, type=str)
 def create_issue(
     server: str, auth: Tuple[str, str], project: str, issue_type: str, summary: str
 ) -> None:
+    """Создание Issue."""
     jira = JiraWrapper(server=server, auth=auth)
 
     fields = {
@@ -78,21 +90,12 @@ def create_issue(
 
 
 @cli.command()
-@click.option(
-    "-js",
-    "--server",
-    required=True,
-    callback=validate_jira_server,
-    envvar="JTL_SERVER",
-)
-@click.option(
-    "-a", "--auth", required=True, callback=validate_jira_auth, envvar="JTL_AUTH"
-)
+@add_common_options
 @click.argument("issue_set_file", type=click.File("r", encoding="utf-8"))
 def create_issue_set(
     server: str, auth: Tuple[str, str], issue_set_file: io.TextIOWrapper
 ) -> None:
-
+    """Создание набора Issue из YAML."""
     jira = JiraWrapper(server=server, auth=auth)
     issue_set_data = yaml.safe_load(issue_set_file)
 
@@ -116,16 +119,7 @@ def create_issue_set(
 # TODO: Вынести общие параметры с envvar в отдельный декоратор,
 #       который прокинет готовый экземпляр jira
 @cli.command()
-@click.option(
-    "-js",
-    "--server",
-    required=True,
-    callback=validate_jira_server,
-    envvar="JTL_SERVER",
-)
-@click.option(
-    "-a", "--auth", required=True, callback=validate_jira_auth, envvar="JTL_AUTH"
-)
+@add_common_options
 @click.option("-p", "--project", required=True, type=str)
 @click.argument("username", type=str, required=False)
 def search_users(
@@ -134,7 +128,7 @@ def search_users(
     project: str,
     username: str,
 ) -> None:
-    """Вывести логины пользователей, доступные для поля assignee."""
+    """Показать логины, доступные для поля assignee."""
     jira = JiraWrapper(server=server, auth=auth)
 
     users = jira.search_users(project=project, username=username)
