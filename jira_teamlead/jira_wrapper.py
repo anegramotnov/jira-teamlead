@@ -53,7 +53,7 @@ class JiraWrapper:
         self, fields: dict, template: Optional[dict] = None
     ) -> IssueWrapper:
         """Создать Issue."""
-        issue_fields = self._inherit_template_fields(
+        issue_fields = self._override_from_template(
             original_fields=fields, template_fields=template
         )
 
@@ -72,7 +72,7 @@ class JiraWrapper:
 
         for original_issue_fields in issue_set:
 
-            issue_fields = self._inherit_template_fields(
+            issue_fields = self._override_from_template(
                 original_fields=original_issue_fields,
                 template_fields=template,
             )
@@ -105,7 +105,7 @@ class JiraWrapper:
 
         return issue
 
-    def _inherit_template_fields(
+    def _override_from_template(
         self, original_fields: dict, template_fields: Optional[dict] = None
     ) -> dict:
         if template_fields is None:
@@ -125,7 +125,7 @@ class JiraWrapper:
         )
         sub_issue_fields[self.DESCRIPTION_FIELD] = new_description
 
-    def _inherit_super_issue_fields(
+    def _override_from_super_issue(
         self, sub_issue_fields: dict, super_issue_fields: dict
     ) -> dict:
         fields = {}
@@ -137,7 +137,7 @@ class JiraWrapper:
         self, fields: dict, super_issue_key: str, super_issue_fields: dict
     ) -> SubIssue:
         """Создать подзадачу, относящуюся к задаче."""
-        sub_issue_fields = self._inherit_super_issue_fields(
+        sub_issue_fields = self._override_from_super_issue(
             sub_issue_fields=fields, super_issue_fields=super_issue_fields
         )
 
