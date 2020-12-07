@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 from click.testing import CliRunner
 
-from jira_teamlead.cli import create_issue, create_issues, find_user
+from jira_teamlead.cli import create_issue, create_issue_set, search_users
 
 
 @pytest.fixture()
@@ -12,32 +12,28 @@ def runner() -> CliRunner:
     return runner
 
 
-@mock.patch("jira_teamlead.cli.jira_lib.JIRA")
-def test_find_users(JIRA_MOCK, runner):
+@mock.patch("jira_teamlead.cli.JiraWrapper")
+def test_search_users(JIRA_MOCK, runner):
 
     user_1 = mock.MagicMock()
     user_1.name = "test"
     user_1.displayName = "Test test"
     user_1.emailAddress = "email at lol dot wut"
-    user_1.deleted = False
-    user_1.active = True
 
     jira_mock = JIRA_MOCK.return_value
 
-    jira_mock.search_assignable_users_for_issues.return_value = [user_1]
+    jira_mock.search_users.return_value = [user_1]
 
     result = runner.invoke(
-        find_user, ["-jh", "http://lol.wut", "-u", "lol:wut", "-p", "LOL"]
-    )
-
-    jira_mock.search_assignable_users_for_issues.assert_called_once_with(
-        username=None, project="LOL"
+        search_users, ["-js", "http://lol.wut", "-a", "lol:wut", "-p", "LOL"]
     )
     assert result.exit_code == 0
     assert result.output == "test (Test test, email at lol dot wut)\n"
 
+    jira_mock.search_users.assert_called_once_with(username=None, project="LOL")
 
-@mock.patch("jira_teamlead.cli.jira_lib.JIRA")
+
+@mock.patch("jira_teamlead.cli.JiraWrapper")
 def test_create_issue(JIRA_MOCK, runner):
     jira_mock = JIRA_MOCK.return_value
 
@@ -49,9 +45,9 @@ def test_create_issue(JIRA_MOCK, runner):
     result = runner.invoke(
         create_issue,
         [
-            "-jh",
+            "-js",
             "http://lol.wut",
-            "-u",
+            "-a",
             "lol:wut",
             "-p",
             "LOL",
@@ -61,22 +57,26 @@ def test_create_issue(JIRA_MOCK, runner):
             "test task",
         ],
     )
-
-    jira_mock.create_issue.assert_called_once_with(
-        issuetype={"name": "Lol"}, project={"key": "LOL"}, summary="test task"
-    )
     assert result.exit_code == 0
     assert result.output == "Created issue: http://lol.wut/browse/LOL-1\n"
 
+    jira_mock.create_issue.assert_called_once_with(
+        fields={
+            "project": {"key": "LOL"},
+            "issuetype": {"name": "Lol"},
+            "summary": "test task",
+        },
+    )
 
-@mock.patch("jira_teamlead.cli.jira_lib.JIRA")
+
+@mock.patch("jira_teamlead.cli.JiraWrapper")
 def test_create_issues(JIRA_MOCK, runner):
     jira_mock = JIRA_MOCK.return_value
 
     issue_mock = mock.MagicMock()
     issue_mock.key = "LOL-1"
 
-    jira_mock.create_issue.return_value = issue_mock
+    jira_mock.create_issue_set.return_value = [issue_mock]
 
     issues_file_content = """
     project:
@@ -87,14 +87,21 @@ def test_create_issues(JIRA_MOCK, runner):
           name: Lol
     """
     with runner.isolated_filesystem():
-        with open("issues2.yaml", "w", encoding="utf-8") as f:
+        with open("test_issues.yaml", "w", encoding="utf-8") as f:
             f.write(issues_file_content)
 
         result = runner.invoke(
-            create_issues, ["-jh", "http://lol.wut", "-u", "lol:wut", "issues2.yaml"]
-        )
-        jira_mock.create_issue.assert_called_once_with(
-            issuetype={"name": "Lol"}, project={"key": "LOL"}, summary="Test Summary"
+            create_issue_set,
+            ["-js", "http://lol.wut", "-a", "lol:wut", "test_issues.yaml"],
         )
         assert result.exit_code == 0
         assert result.output == "Created issue: http://lol.wut/browse/LOL-1\n"
+        jira_mock.create_issue_set.assert_called_once_with(
+            issue_set=[
+                {
+                    "summary": "Test Summary",
+                    "issuetype": {"name": "Lol"},
+                }
+            ],
+            project={"key": "LOL"},
+        )

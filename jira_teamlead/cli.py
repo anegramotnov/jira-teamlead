@@ -3,11 +3,12 @@ from typing import Tuple
 from urllib.parse import urlparse
 
 import click
-import jira as jira_lib
 import yaml
 
+from jira_teamlead.jira_wrapper import JiraWrapper, SuperIssue
 
-def validate_user(
+
+def validate_jira_auth(
     ctx: click.Context, param: click.Parameter, value: str
 ) -> Tuple[str, str]:
     """Валидация параметра --user."""
@@ -25,7 +26,7 @@ def validate_user(
     return login, password
 
 
-def validate_jira_host(ctx: click.Context, param: click.Parameter, value: str) -> str:
+def validate_jira_server(ctx: click.Context, param: click.Parameter, value: str) -> str:
     """Валидация и преобразование параметра --jira-host."""
     url = urlparse(value)
 
@@ -45,22 +46,24 @@ def cli() -> None:
 
 @cli.command()
 @click.option(
-    "-jh",
-    "--jira-host",
+    "-js",
+    "--server",
     required=True,
-    callback=validate_jira_host,
-    envvar="JT_JIRA_HOST",
+    callback=validate_jira_server,
+    envvar="JT_JIRA_SERVER",
 )
-@click.option("-u", "--user", required=True, callback=validate_user, envvar="JT_USER")
+@click.option(
+    "-a", "--auth", required=True, callback=validate_jira_auth, envvar="JT_JIRA_AUTH"
+)
 @click.option("-p", "--project", required=True, type=str)
 @click.option("-t", "--type", "issue_type", required=True, type=str)
 @click.option("-s", "--summary", required=True, type=str)
 def create_issue(
-    jira_host: str, user: str, project: str, issue_type: str, summary: str
+    server: str, auth: Tuple[str, str], project: str, issue_type: str, summary: str
 ) -> None:
-    jira = jira_lib.JIRA(jira_host, basic_auth=user)
+    jira = JiraWrapper(server=server, auth=auth)
 
-    create_payload = {
+    fields = {
         "project": {
             "key": project,
         },
@@ -69,65 +72,68 @@ def create_issue(
         },
         "summary": summary,
     }
-    created_issue = jira.create_issue(**create_payload)
+    created_issue = jira.create_issue(fields=fields)
 
-    click.echo(f"Created issue: {jira_host}/browse/{created_issue.key}")
+    click.echo(f"Created issue: {server}/browse/{created_issue.key}")
 
 
 @cli.command()
 @click.option(
-    "-jh",
-    "--jira-host",
+    "-js",
+    "--server",
     required=True,
-    callback=validate_jira_host,
-    envvar="JT_JIRA_HOST",
+    callback=validate_jira_server,
+    envvar="JT_JIRA_SERVER",
 )
-@click.option("-u", "--user", required=True, callback=validate_user, envvar="JT_USER")
-@click.argument("issues_source_file", type=click.File("r", encoding="utf-8"))
-def create_issues(
-    jira_host: str, user: str, issues_source_file: io.TextIOWrapper
+@click.option(
+    "-a", "--auth", required=True, callback=validate_jira_auth, envvar="JT_JIRA_AUTH"
+)
+@click.argument("issue_set_file", type=click.File("r", encoding="utf-8"))
+def create_issue_set(
+    server: str, auth: Tuple[str, str], issue_set_file: io.TextIOWrapper
 ) -> None:
-    jira = jira_lib.JIRA(jira_host, basic_auth=user)
 
-    issues_source_data = yaml.safe_load(issues_source_file)
+    jira = JiraWrapper(server=server, auth=auth)
+    issue_set_data = yaml.safe_load(issue_set_file)
 
-    issues_data = issues_source_data["issues"]
-    project = issues_source_data["project"]
+    issues = jira.create_issue_set(
+        project=issue_set_data["project"], issue_set=issue_set_data["issues"]
+    )
 
-    for issue_data in issues_data:
-        issue_data["project"] = project
-
-        created_issue = jira.create_issue(**issue_data)
-
-        click.echo(f"Created issue: {jira_host}/browse/{created_issue.key}")
+    for issue in issues:
+        if isinstance(issue, SuperIssue):
+            click.echo(f"Created super-issue: {server}/browse/{issue.key}")
+            for sub_issue in issue.sub_issues:
+                click.echo(f"    Created sub-issue: {server}/browse/{sub_issue.key}")
+        else:
+            click.echo(f"Created issue: {server}/browse/{issue.key}")
 
 
 # TODO: Вынести общие параметры с envvar в отдельный декоратор,
 #       который прокинет готовый экземпляр jira
 @cli.command()
 @click.option(
-    "-jh",
-    "--jira-host",
+    "-js",
+    "--server",
     required=True,
-    callback=validate_jira_host,
-    envvar="JT_JIRA_HOST",
+    callback=validate_jira_server,
+    envvar="JT_JIRA_SERVER",
 )
 @click.option(
-    "-u", "--user", "auth", required=True, callback=validate_user, envvar="JT_USER"
+    "-a", "--auth", required=True, callback=validate_jira_auth, envvar="JT_JIRA_AUTH"
 )
 @click.option("-p", "--project", required=True, type=str)
 @click.argument("username", type=str, required=False)
-def find_user(
-    jira_host: str,
-    auth: str,
+def search_users(
+    server: str,
+    auth: Tuple[str, str],
     project: str,
     username: str,
 ) -> None:
-    jira = jira_lib.JIRA(jira_host, basic_auth=auth)
+    """Вывести логины пользователей, доступные для поля assignee."""
+    jira = JiraWrapper(server=server, auth=auth)
 
-    users = jira.search_assignable_users_for_issues(username=username, project=project)
+    users = jira.search_users(project=project, username=username)
 
     for user in users:
-        if user.deleted or not user.active:
-            continue
         click.echo(f"{user.name} ({user.displayName}, {user.emailAddress})")
