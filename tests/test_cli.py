@@ -66,6 +66,7 @@ def test_create_issue(JIRA_MOCK, runner):
             "issuetype": {"name": "Lol"},
             "summary": "test task",
         },
+        template=None,
     )
 
 
@@ -107,5 +108,5 @@ def test_create_issue_set(JIRA_MOCK, runner):
                     "jtl_sub_issues": [{"summary": "Test Sub Summary"}],
                 }
             ],
-            issue_template={"project": {"key": "LOL"}},
+            template={"project": {"key": "LOL"}},
         )

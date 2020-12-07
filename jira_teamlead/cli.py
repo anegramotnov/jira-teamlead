@@ -1,5 +1,5 @@
 import io
-from typing import Callable, Tuple
+from typing import Any, Callable, Optional, Tuple
 from urllib.parse import urlparse
 
 import click
@@ -35,6 +35,50 @@ def validate_jira_server(ctx: click.Context, param: click.Parameter, value: str)
         raise click.BadParameter("ожидается формат 'http[s]://jira.host.net'")
 
     return f"{url.scheme}://{url.netloc}"
+
+
+def set_template_to_ctx(
+    ctx: click.Context, param: click.Parameter, value: Optional[io.TextIOWrapper]
+) -> Optional[dict]:
+    if value is not None:
+        template = yaml.safe_load(value)
+        ctx.params["template"] = template
+        return template
+    else:
+        return None
+
+
+class IssueTemplateOption(click.Option):
+    def __init__(
+        self,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        template_var = kwargs.pop("template_var")
+        super().__init__(*args, **kwargs)
+        self.template_var = template_var
+
+    def value_from_template(self, ctx: click.Context) -> Optional[str]:
+        if self.template_var is not None:
+            parts = self.template_var.split(".")
+            value = ctx.params["template"]
+            for part in parts:
+                value = value.get(part)
+                if value is None:
+                    return None
+            return value
+        else:
+            return None
+
+    def consume_value(self, ctx: click.Context, opts: dict) -> Any:
+        value = opts.get(self.name)
+        if value is None:
+            value = self.value_from_envvar(ctx)
+        if value is None:
+            value = self.value_from_template(ctx)
+        if value is None:
+            value = ctx.lookup_default(self.name)
+        return value
 
 
 common_options = (
@@ -73,11 +117,49 @@ def jtl() -> None:
 
 @jtl.command()
 @add_common_jtl_options
-@click.option("-p", "--project", required=True, type=str, help="Ключ проекта")
-@click.option("-t", "--type", "issue_type", required=True, type=str, help="Тип Issue")
-@click.option("-s", "--summary", required=True, type=str, help="Название задачи")
+@click.option(
+    "-tmpl",
+    "--template",
+    required=False,
+    callback=set_template_to_ctx,
+    type=click.File(),
+    envvar="JTL_ISSUE_TEMPLATE",
+)
+@click.option(
+    "-p",
+    "--project",
+    cls=IssueTemplateOption,
+    required=True,
+    type=str,
+    help="Ключ проекта",
+    template_var="project.key",
+)
+@click.option(
+    "-t",
+    "--type",
+    "issue_type",
+    cls=IssueTemplateOption,
+    required=True,
+    type=str,
+    help="Тип Issue",
+    template_var="issuetype.name",
+)
+@click.option(
+    "-s",
+    "--summary",
+    cls=IssueTemplateOption,
+    required=True,
+    type=str,
+    help="Название задачи",
+    template_var="summary",
+)
 def create_issue(
-    server: str, auth: Tuple[str, str], project: str, issue_type: str, summary: str
+    server: str,
+    auth: Tuple[str, str],
+    template: Optional[dict],
+    project: str,
+    issue_type: str,
+    summary: str,
 ) -> None:
     """Создание Issue."""
     jira = JiraWrapper(server=server, auth=auth)
@@ -91,7 +173,8 @@ def create_issue(
         },
         "summary": summary,
     }
-    created_issue = jira.create_issue(fields=fields)
+
+    created_issue = jira.create_issue(fields=fields, template=template)
 
     click.echo(f"Created issue: {server}/browse/{created_issue.key}")
 
@@ -111,7 +194,7 @@ def create_issue_set(
 
     issues = jira.create_issue_set(
         issue_set=issue_set,
-        issue_template=issue_template,
+        template=issue_template,
     )
 
     for issue in issues:

@@ -69,7 +69,7 @@ def test_create_issue_set(JIRA_MOCK):
                 ],
             }
         ],
-        issue_template={"project": {"key": "LOL"}},
+        template={"project": {"key": "LOL"}},
     )
 
     assert len(result) == 1

@@ -49,9 +49,15 @@ class JiraWrapper:
     def __init__(self, server: str, auth: Tuple[str, str]) -> None:
         self.jira = JIRA(server=server, auth=auth)
 
-    def create_issue(self, fields: dict) -> IssueWrapper:
+    def create_issue(
+        self, fields: dict, template: Optional[dict] = None
+    ) -> IssueWrapper:
         """Создать Issue."""
-        created_lib_issue = self.jira.create_issue(**fields)
+        issue_fields = self._inherit_template_fields(
+            original_fields=fields, template_fields=template
+        )
+
+        created_lib_issue = self.jira.create_issue(**issue_fields)
 
         issue = IssueWrapper.from_lib(issue=created_lib_issue)
 
@@ -60,7 +66,7 @@ class JiraWrapper:
     def create_issue_set(
         self,
         issue_set: List[dict],
-        issue_template: Optional[dict] = None,
+        template: Optional[dict] = None,
     ) -> List[IssueWrapper]:
         issues: List[IssueWrapper] = []
 
@@ -68,7 +74,7 @@ class JiraWrapper:
 
             issue_fields = self._inherit_template_fields(
                 original_fields=original_issue_fields,
-                template_fields=issue_template,
+                template_fields=template,
             )
 
             if jtl_fields.SUB_ISSUE_FIELD in issue_fields:
