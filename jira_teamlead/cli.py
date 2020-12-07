@@ -83,10 +83,9 @@ def create_issue(
     envvar="JT_JIRA_HOST",
 )
 @click.option("-u", "--user", required=True, callback=validate_user, envvar="JT_USER")
-@click.option("--dry-run", is_flag=True)
 @click.argument("issues_source_file", type=click.File("r", encoding="utf-8"))
 def create_issues(
-    jira_host: str, user: str, dry_run: bool, issues_source_file: io.TextIOWrapper
+    jira_host: str, user: str, issues_source_file: io.TextIOWrapper
 ) -> None:
     jira = jira_lib.JIRA(jira_host, basic_auth=user)
 
@@ -100,10 +99,10 @@ def create_issues(
 
         created_issue = jira.create_issue(**issue_data)
 
-        if not dry_run:
-            click.echo(f"Created issue: {jira_host}/browse/{created_issue.key}")
+        click.echo(f"Created issue: {jira_host}/browse/{created_issue.key}")
 
 
+# TODO: Вынести общие параметры с envvar в отдельный декоратор
 @cli.command()
 @click.option(
     "-jh",
