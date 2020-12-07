@@ -1,17 +1,9 @@
-from unittest.mock import MagicMock
+from unittest import mock
 
 import pytest
 from click.testing import CliRunner
 
 from jira_teamlead.cli import create_issue, create_issues, find_user
-from jira_teamlead.jira import JiraServer
-
-
-@pytest.fixture()
-def request_mock() -> MagicMock:
-    request_mock = MagicMock()
-    JiraServer.request = request_mock
-    return request_mock
 
 
 @pytest.fixture()
@@ -20,20 +12,40 @@ def runner() -> CliRunner:
     return runner
 
 
-def test_find_users(runner, request_mock):
+@mock.patch("jira_teamlead.cli.jira_lib.JIRA")
+def test_find_users(JIRA_MOCK, runner):
+
+    user_1 = mock.MagicMock()
+    user_1.name = "test"
+    user_1.displayName = "Test test"
+    user_1.emailAddress = "email at lol dot wut"
+    user_1.deleted = False
+    user_1.active = True
+
+    jira_mock = JIRA_MOCK.return_value
+
+    jira_mock.search_assignable_users_for_issues.return_value = [user_1]
+
     result = runner.invoke(
         find_user, ["-jh", "http://lol.wut", "-u", "lol:wut", "-p", "LOL"]
     )
 
-    request_mock.assert_called_once_with(
-        method="GET",
-        path="/rest/api/2/user/assignable/search",
-        params={"project": "LOL", "username": None},
+    jira_mock.search_assignable_users_for_issues.assert_called_once_with(
+        username=None, project="LOL"
     )
     assert result.exit_code == 0
+    assert result.output == "test (Test test, email at lol dot wut)\n"
 
 
-def test_create_issue(runner, request_mock):
+@mock.patch("jira_teamlead.cli.jira_lib.JIRA")
+def test_create_issue(JIRA_MOCK, runner):
+    jira_mock = JIRA_MOCK.return_value
+
+    issue_mock = mock.MagicMock()
+    issue_mock.key = "LOL-1"
+
+    jira_mock.create_issue.return_value = issue_mock
+
     result = runner.invoke(
         create_issue,
         [
@@ -50,21 +62,22 @@ def test_create_issue(runner, request_mock):
         ],
     )
 
-    request_mock.assert_called_once_with(
-        method="POST",
-        path="/rest/api/2/issue",
-        payload={
-            "fields": {
-                "project": {"key": "LOL"},
-                "issuetype": {"name": "Lol"},
-                "summary": "test task",
-            }
-        },
+    jira_mock.create_issue.assert_called_once_with(
+        issuetype={"name": "Lol"}, project={"key": "LOL"}, summary="test task"
     )
     assert result.exit_code == 0
+    assert result.output == "Created issue: http://lol.wut/browse/LOL-1\n"
 
 
-def test_create_issues(runner, request_mock):
+@mock.patch("jira_teamlead.cli.jira_lib.JIRA")
+def test_create_issues(JIRA_MOCK, runner):
+    jira_mock = JIRA_MOCK.return_value
+
+    issue_mock = mock.MagicMock()
+    issue_mock.key = "LOL-1"
+
+    jira_mock.create_issue.return_value = issue_mock
+
     issues_file_content = """
     project:
       key: "LOL"
@@ -80,15 +93,8 @@ def test_create_issues(runner, request_mock):
         result = runner.invoke(
             create_issues, ["-jh", "http://lol.wut", "-u", "lol:wut", "issues2.yaml"]
         )
-        request_mock.assert_called_once_with(
-            method="POST",
-            path="/rest/api/2/issue",
-            payload={
-                "fields": {
-                    "summary": "Test Summary",
-                    "issuetype": {"name": "Lol"},
-                    "project": {"key": "LOL"},
-                }
-            },
+        jira_mock.create_issue.assert_called_once_with(
+            issuetype={"name": "Lol"}, project={"key": "LOL"}, summary="Test Summary"
         )
         assert result.exit_code == 0
+        assert result.output == "Created issue: http://lol.wut/browse/LOL-1\n"

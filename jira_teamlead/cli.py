@@ -1,25 +1,28 @@
 import io
-from pprint import pformat
+from typing import Tuple
 from urllib.parse import urlparse
 
 import click
+import jira as jira_lib
 import yaml
 
-from jira_teamlead.jira import JiraServer
 
-
-def validate_user(ctx: click.Context, param: click.Parameter, value: str) -> str:
+def validate_user(
+    ctx: click.Context, param: click.Parameter, value: str
+) -> Tuple[str, str]:
     """Валидация параметра --user."""
-    splitted_parts = value.split(":")
-    if len(splitted_parts) != 2 or not all(splitted_parts):
-        raise click.BadParameter("ожидается формат 'login:password'")
-
     try:
         value.encode("ascii")
     except UnicodeEncodeError:
         raise click.BadParameter("ожидаются символы ASCII")
 
-    return value
+    splitted_parts = value.split(":")
+    if len(splitted_parts) != 2 or not all(splitted_parts):
+        raise click.BadParameter("ожидается формат 'login:password'")
+
+    login, password = splitted_parts
+
+    return login, password
 
 
 def validate_jira_host(ctx: click.Context, param: click.Parameter, value: str) -> str:
@@ -46,21 +49,20 @@ def cli() -> None:
 def create_issue(
     jira_host: str, user: str, project: str, issue_type: str, summary: str
 ) -> None:
-    jira = JiraServer(host=jira_host, auth_string=user)
+    jira = jira_lib.JIRA(jira_host, basic_auth=user)
 
     create_payload = {
-        "fields": {
-            "project": {
-                "key": project,
-            },
-            "issuetype": {
-                "name": issue_type,
-            },
-            "summary": summary,
-        }
+        "project": {
+            "key": project,
+        },
+        "issuetype": {
+            "name": issue_type,
+        },
+        "summary": summary,
     }
-    response = jira.post("/rest/api/2/issue", create_payload)
-    click.echo(pformat(response))
+    created_issue = jira.create_issue(**create_payload)
+
+    click.echo(f"Created issue: {jira_host}/browse/{created_issue.key}")
 
 
 @cli.command()
@@ -71,7 +73,7 @@ def create_issue(
 def create_issues(
     jira_host: str, user: str, dry_run: bool, issues_source_file: io.TextIOWrapper
 ) -> None:
-    jira = JiraServer(host=jira_host, auth_string=user, dry_run=dry_run)
+    jira = jira_lib.JIRA(jira_host, basic_auth=user)
 
     issues_source_data = yaml.safe_load(issues_source_file)
 
@@ -80,34 +82,29 @@ def create_issues(
 
     for issue_data in issues_data:
         issue_data["project"] = project
-        issue_payload = {"fields": issue_data}
 
-        response: dict = jira.post("/rest/api/2/issue", payload=issue_payload)
+        created_issue = jira.create_issue(**issue_data)
 
         if not dry_run:
-            click.echo(f"Created issue: {jira.host}/browse/{response['key']}")
+            click.echo(f"Created issue: {jira_host}/browse/{created_issue.key}")
 
 
 @cli.command()
 @click.option("-jh", "--jira-host", required=True, callback=validate_jira_host)
-@click.option("-u", "--user", required=True, callback=validate_user)
+@click.option("-u", "--user", "auth", required=True, callback=validate_user)
 @click.option("-p", "--project", required=True, type=str)
 @click.argument("username", type=str, required=False)
 def find_user(
     jira_host: str,
-    user: str,
+    auth: str,
     project: str,
     username: str,
 ) -> None:
-    jira = JiraServer(host=jira_host, auth_string=user)
+    jira = jira_lib.JIRA(jira_host, get_server_info=False, basic_auth=auth)
 
-    response = jira.get(
-        "/rest/api/2/user/assignable/search",
-        params={"project": project, "username": username},
-    )
+    users = jira.search_assignable_users_for_issues(username=username, project=project)
 
-    for user in response:
-        if user["deleted"] or not user["active"]:
+    for user in users:
+        if user.deleted or not user.active:
             continue
-        aliases = [user["displayName"], user["emailAddress"]]
-        click.echo("{0} ({1})".format(user["name"], ", ".join(aliases)))
+        click.echo(f"{user.name} ({user.displayName}, {user.emailAddress})")

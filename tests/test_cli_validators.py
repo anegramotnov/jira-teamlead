@@ -11,7 +11,7 @@ def test_validate_user_fail(value):
 
 
 def test_validate_user_ok():
-    assert validate_user(None, None, "lol:wut") == "lol:wut"
+    assert validate_user(None, None, "lol:wut") == ("lol", "wut")
 
 
 @pytest.mark.parametrize("value", ("", "lol", "lol.wut.lol", "http:lol.wut"))
