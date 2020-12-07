@@ -117,6 +117,15 @@ $ jtl create-issue -tmpl issue.yaml -s "Добавить функцию созд
 Created issue: http://localhost:8080/browse/DEV-11
 ```
 
+Путь к файлу шаблона может быть указан в переменных окружения или .env-файле
+с помощью переменной `JTL_ISSUE_TEMPLATE`.
+
+```
+export JTL_ISSUE_TEMPLATE=issue.yaml
+$ jtl create-issue -s "Добавить функцию создания задачи"
+Created issue: http://localhost:8080/browse/DEV-11
+```
+
 
 ### Вывод информации о созданном Issue
 
