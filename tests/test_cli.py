@@ -30,7 +30,7 @@ def test_search_users(JIRA_MOCK, runner):
     assert result.exit_code == 0
     assert result.output == "test (Test test, email at lol dot wut)\n"
 
-    jira_mock.search_users.assert_called_once_with(username=None, project="LOL")
+    jira_mock.search_users.assert_called_once_with(search_string=None, project="LOL")
 
 
 @mock.patch("jira_teamlead.cli.JiraWrapper")
@@ -70,7 +70,7 @@ def test_create_issue(JIRA_MOCK, runner):
 
 
 @mock.patch("jira_teamlead.cli.JiraWrapper")
-def test_create_issues(JIRA_MOCK, runner):
+def test_create_issue_set(JIRA_MOCK, runner):
     jira_mock = JIRA_MOCK.return_value
 
     issue_mock = mock.MagicMock()
@@ -79,13 +79,15 @@ def test_create_issues(JIRA_MOCK, runner):
     jira_mock.create_issue_set.return_value = [issue_mock]
 
     issues_file_content = """
-    template:
+    jtl_template:
       project:
         key: "LOL"
-    issues:
+    jtl_issues:
       - summary: "Test Summary"
         issuetype:
           name: Lol
+        jtl_sub_issues:
+          - summary: "Test Sub Summary"
     """
     with runner.isolated_filesystem():
         with open("test_issues.yaml", "w", encoding="utf-8") as f:
@@ -102,6 +104,7 @@ def test_create_issues(JIRA_MOCK, runner):
                 {
                     "summary": "Test Summary",
                     "issuetype": {"name": "Lol"},
+                    "jtl_sub_issues": [{"summary": "Test Sub Summary"}],
                 }
             ],
             issue_template={"project": {"key": "LOL"}},

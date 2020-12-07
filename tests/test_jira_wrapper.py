@@ -61,7 +61,7 @@ def test_create_issue_set(JIRA_MOCK):
                 "summary": "Test issue",
                 "issuetype": "Story",
                 "description": "Test description",
-                "sub_issues": [
+                "jtl_sub_issues": [
                     {
                         "summary": "Test sub-issue",
                         "issuetype": "Task",

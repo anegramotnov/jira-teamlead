@@ -3,6 +3,8 @@ from typing import List, Optional, Tuple, Type, TypeVar
 
 from jira import JIRA, Issue, User
 
+from jira_teamlead import jtl_fields
+
 IssueType = TypeVar("IssueType", bound="IssueWrapper")
 
 
@@ -38,8 +40,6 @@ class UserWrapper:
 class JiraWrapper:
     jira: JIRA
 
-    SUB_ISSUE_FIELD = "sub_issues"
-
     DESCRIPTION_FIELD = "description"
     SUB_ISSUE_DESCRIPTION_TEMPLATE = """
     Основная задача: {super_issue_key}
@@ -71,8 +71,8 @@ class JiraWrapper:
                 template_fields=issue_template,
             )
 
-            if self.SUB_ISSUE_FIELD in issue_fields:
-                sub_issues = issue_fields.pop(self.SUB_ISSUE_FIELD)
+            if jtl_fields.SUB_ISSUE_FIELD in issue_fields:
+                sub_issues = issue_fields.pop(jtl_fields.SUB_ISSUE_FIELD)
                 super_issue = self.create_super_issue(
                     fields=issue_fields, sub_issues=sub_issues
                 )
@@ -146,11 +146,11 @@ class JiraWrapper:
         return sub_issue
 
     def search_users(
-        self, project: str, username: Optional[str] = None
+        self, project: str, search_string: Optional[str] = None
     ) -> List[UserWrapper]:
         """Вывести логины пользователей, доступные для поля assignee."""
         lib_users = self.jira.search_assignable_users_for_issues(
-            username=username, project=project
+            username=search_string, project=project
         )
         users = []
         for lib_user in lib_users:
