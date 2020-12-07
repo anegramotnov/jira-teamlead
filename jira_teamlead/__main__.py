@@ -1,4 +1,4 @@
-from jira_teamlead.cli import cli
+from jira_teamlead.cli import jtl
 
 if __name__ == "__main__":
-    cli()
+    jtl()

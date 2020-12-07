@@ -50,22 +50,22 @@ common_options = (
 )
 
 
-def add_common_options(command: Callable) -> Callable:
+def add_common_jtl_options(command: Callable) -> Callable:
     for option in reversed(common_options):
         command = option(command)
     return command
 
 
 @click.group()
-def cli() -> None:
+def jtl() -> None:
     """Инструмент автоматизации создания Issue в Jira."""
     import dotenv
 
     dotenv.load_dotenv(verbose=True)
 
 
-@cli.command()
-@add_common_options
+@jtl.command()
+@add_common_jtl_options
 @click.option("-p", "--project", required=True, type=str)
 @click.option("-t", "--type", "issue_type", required=True, type=str)
 @click.option("-s", "--summary", required=True, type=str)
@@ -89,8 +89,8 @@ def create_issue(
     click.echo(f"Created issue: {server}/browse/{created_issue.key}")
 
 
-@cli.command()
-@add_common_options
+@jtl.command()
+@add_common_jtl_options
 @click.argument("issue_set_file", type=click.File("r", encoding="utf-8"))
 def create_issue_set(
     server: str, auth: Tuple[str, str], issue_set_file: io.TextIOWrapper
@@ -116,10 +116,8 @@ def create_issue_set(
             click.echo(f"Created issue: {server}/browse/{issue.key}")
 
 
-# TODO: Вынести общие параметры с envvar в отдельный декоратор,
-#       который прокинет готовый экземпляр jira
-@cli.command()
-@add_common_options
+@jtl.command()
+@add_common_jtl_options
 @click.option("-p", "--project", required=True, type=str)
 @click.argument("username", type=str, required=False)
 def search_users(
@@ -135,3 +133,23 @@ def search_users(
 
     for user in users:
         click.echo(f"{user.name} ({user.displayName}, {user.emailAddress})")
+
+
+@jtl.command()
+@add_common_jtl_options
+# @click.option("-i", "--issue", required=True, type=str)
+@click.argument("issue_id", type=str, required=True)
+def get_issue(
+    server: str,
+    auth: Tuple[str, str],
+    issue_id: str,
+) -> None:
+    jira = JiraWrapper(server=server, auth=auth)
+
+    issue = jira.get_issue(issue_id=issue_id)
+
+    fields = issue.lib_issue.raw["fields"]
+
+    yaml_string = yaml.dump(fields, allow_unicode=True)
+
+    click.echo(yaml_string)

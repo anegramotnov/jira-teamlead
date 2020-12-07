@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Type, TypeVar
 
 from jira import JIRA, Issue, User
+
+IssueType = TypeVar("IssueType", bound="IssueWrapper")
 
 
 @dataclass
@@ -9,6 +11,10 @@ class IssueWrapper:
     lib_issue: Issue
     key: str
     summary: str
+
+    @classmethod
+    def from_lib(cls: Type[IssueType], issue: Issue) -> IssueType:
+        return cls(lib_issue=issue, key=issue.key, summary=issue.fields.summary)
 
 
 @dataclass
@@ -46,11 +52,9 @@ class JiraWrapper:
     def create_issue(self, fields: dict) -> IssueWrapper:
         """Создать Issue."""
         created_lib_issue = self.jira.create_issue(**fields)
-        issue = IssueWrapper(
-            lib_issue=created_lib_issue,
-            key=created_lib_issue.key,
-            summary=created_lib_issue.fields.summary,
-        )
+
+        issue = IssueWrapper.from_lib(issue=created_lib_issue)
+
         return issue
 
     def create_issue_set(
@@ -83,11 +87,7 @@ class JiraWrapper:
         """Создать задачу, содержащее подзадачи."""
         created_issue = self.create_issue(fields=fields)
 
-        issue = SuperIssue(
-            lib_issue=created_issue.lib_issue,
-            key=created_issue.key,
-            summary=created_issue.summary,
-        )
+        issue = SuperIssue.from_lib(issue=created_issue.lib_issue)
 
         for sub_issue_extra_fields in sub_issues:
             sub_issue = self.create_sub_issue(
@@ -141,11 +141,8 @@ class JiraWrapper:
 
         created_issue = self.create_issue(fields=sub_issue_fields)
 
-        sub_issue = SubIssue(
-            lib_issue=created_issue.lib_issue,
-            key=created_issue.key,
-            summary=created_issue.summary,
-        )
+        sub_issue = SubIssue.from_lib(issue=created_issue.lib_issue)
+
         return sub_issue
 
     def search_users(
@@ -168,3 +165,10 @@ class JiraWrapper:
                 )
 
         return users
+
+    def get_issue(self, issue_id: str) -> IssueWrapper:
+        lib_issue = self.jira.issue(id=issue_id)
+
+        issue = IssueWrapper.from_lib(issue=lib_issue)
+
+        return issue
