@@ -31,6 +31,10 @@ __pycache__/
 # Unit test / coverage reports
 htmlcov/
 
+# Dist/Build
+
+/dist
+
 # mypy
 dmypy.json
 
