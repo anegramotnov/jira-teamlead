@@ -79,8 +79,9 @@ def test_create_issues(JIRA_MOCK, runner):
     jira_mock.create_issue_set.return_value = [issue_mock]
 
     issues_file_content = """
-    project:
-      key: "LOL"
+    template:
+      project:
+        key: "LOL"
     issues:
       - summary: "Test Summary"
         issuetype:
@@ -103,5 +104,5 @@ def test_create_issues(JIRA_MOCK, runner):
                     "issuetype": {"name": "Lol"},
                 }
             ],
-            project={"key": "LOL"},
+            issue_template={"project": {"key": "LOL"}},
         )

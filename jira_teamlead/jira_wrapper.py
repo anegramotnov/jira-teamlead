@@ -54,21 +54,27 @@ class JiraWrapper:
         return issue
 
     def create_issue_set(
-        self, project: dict, issue_set: List[dict]
+        self,
+        issue_set: List[dict],
+        issue_template: Optional[dict] = None,
     ) -> List[IssueWrapper]:
         issues: List[IssueWrapper] = []
 
-        for issue_data in issue_set:
-            issue_data["project"] = project
+        for original_issue_fields in issue_set:
 
-            if self.SUB_ISSUE_FIELD in issue_data:
-                sub_issues = issue_data.pop(self.SUB_ISSUE_FIELD)
+            issue_fields = self._inherit_template_fields(
+                original_fields=original_issue_fields,
+                template_fields=issue_template,
+            )
+
+            if self.SUB_ISSUE_FIELD in issue_fields:
+                sub_issues = issue_fields.pop(self.SUB_ISSUE_FIELD)
                 super_issue = self.create_super_issue(
-                    fields=issue_data, sub_issues=sub_issues
+                    fields=issue_fields, sub_issues=sub_issues
                 )
                 issues.append(super_issue)
             else:
-                issue = self.create_issue(fields=issue_data)
+                issue = self.create_issue(fields=issue_fields)
                 issues.append(issue)
 
         return issues
@@ -92,6 +98,17 @@ class JiraWrapper:
             issue.sub_issues.append(sub_issue)
 
         return issue
+
+    def _inherit_template_fields(
+        self, original_fields: dict, template_fields: Optional[dict] = None
+    ) -> dict:
+        if template_fields is None:
+            return original_fields
+
+        fields: dict = {}
+        fields.update(template_fields)
+        fields.update(original_fields)
+        return fields
 
     def _update_sub_issue_description(
         self, sub_issue_fields: dict, super_issue_key: str

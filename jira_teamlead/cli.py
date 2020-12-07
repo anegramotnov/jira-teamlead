@@ -96,8 +96,12 @@ def create_issue_set(
     jira = JiraWrapper(server=server, auth=auth)
     issue_set_data = yaml.safe_load(issue_set_file)
 
+    issue_set = issue_set_data["issues"]
+    issue_template = issue_set_data.get("template")
+
     issues = jira.create_issue_set(
-        project=issue_set_data["project"], issue_set=issue_set_data["issues"]
+        issue_set=issue_set,
+        issue_template=issue_template,
     )
 
     for issue in issues:

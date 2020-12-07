@@ -56,7 +56,6 @@ def test_create_issue_set(JIRA_MOCK):
     jira_wrapper = JiraWrapper(server="http://lol.wut", auth=("lol", "wut"))
 
     result = jira_wrapper.create_issue_set(
-        project={"key": "LOL"},
         issue_set=[
             {
                 "summary": "Test issue",
@@ -70,6 +69,7 @@ def test_create_issue_set(JIRA_MOCK):
                 ],
             }
         ],
+        issue_template={"project": {"key": "LOL"}},
     )
 
     assert len(result) == 1
