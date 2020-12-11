@@ -39,6 +39,7 @@ class UserWrapper:
 
 class JiraWrapper:
     jira: JIRA
+    server: str
 
     DESCRIPTION_FIELD = "description"
     SUB_ISSUE_DESCRIPTION_TEMPLATE = """
@@ -47,7 +48,8 @@ class JiraWrapper:
     {description}"""
 
     def __init__(self, server: str, auth: Tuple[str, str]) -> None:
-        self.jira = JIRA(server=server, auth=auth)
+        self.server = server
+        self.jira = JIRA(server=self.server, auth=auth)
 
     def create_issue(
         self, fields: dict, template: Optional[dict] = None

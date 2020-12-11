@@ -1,23 +1,23 @@
 import click
 import pytest
 
-from jira_teamlead.cli import validate_jira_auth, validate_jira_server
+from jira_teamlead.cli.validators import parse_auth_option, parse_server_option
 
 
 @pytest.mark.parametrize("value", ("", "lol", "lol:wut:lol", ":lol", "wut:", "лол:што"))
-def test_validate_user_fail(value):
+def test_parse_auth_fail(value):
     with pytest.raises(click.BadParameter):
-        validate_jira_auth(None, None, value)
+        parse_auth_option(None, None, value)
 
 
-def test_validate_user_ok():
-    assert validate_jira_auth(None, None, "lol:wut") == ("lol", "wut")
+def test_parse_auth_ok():
+    assert parse_auth_option(None, None, "lol:wut") == ("lol", "wut")
 
 
 @pytest.mark.parametrize("value", ("", "lol", "lol.wut.lol", "http:lol.wut"))
-def test_validate_jira_host_fail(value):
+def test_parse_server_fail(value):
     with pytest.raises(click.BadParameter):
-        validate_jira_server(None, None, value)
+        parse_server_option(None, None, value)
 
 
 @pytest.mark.parametrize(
@@ -29,5 +29,5 @@ def test_validate_jira_host_fail(value):
         ("http://lol.wut?lol=wut", "http://lol.wut"),
     ),
 )
-def test_validate_jira_host_ok(value, expected):
-    assert validate_jira_server(None, None, value) == expected
+def test_parse_server_ok(value, expected):
+    assert parse_server_option(None, None, value) == expected
