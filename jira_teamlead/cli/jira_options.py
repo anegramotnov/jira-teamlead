@@ -3,7 +3,8 @@ from typing import Any, Callable
 
 import click
 
-from jira_teamlead.cli.config import try_get_from_config
+from jira_teamlead.cli.config_options import from_config_fallback
+from jira_teamlead.cli.fallback_options import FallbackOption
 from jira_teamlead.cli.validators import parse_auth_option, parse_server_option
 from jira_teamlead.jira_wrapper import JiraWrapper
 
@@ -11,17 +12,19 @@ jira_options = (
     click.option(
         "-js",
         "--server",
-        callback=try_get_from_config(
-            parse_server_option, section="jira", option="server", required=True
-        ),
+        cls=FallbackOption,
+        required=True,
+        fallback=from_config_fallback(section="jira", option="server"),
+        callback=parse_server_option,
         help="Cервер Jira",
     ),
     click.option(
         "-ja",
         "--auth",
-        callback=try_get_from_config(
-            parse_auth_option, section="jira", option="auth", required=True
-        ),
+        cls=FallbackOption,
+        fallback=from_config_fallback(section="jira", option="auth"),
+        required=True,
+        callback=parse_auth_option,
         help="Учетные данные в формате 'login:password'",
     ),
 )

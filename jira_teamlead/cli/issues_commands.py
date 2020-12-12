@@ -4,12 +4,16 @@ import click
 import yaml
 
 from jira_teamlead import jtl_fields
-from jira_teamlead.cli.config import try_get_from_config
-from jira_teamlead.cli.config_options import add_config_option, skip_config_option
+from jira_teamlead.cli.config_options import (
+    add_config_option,
+    from_config_fallback,
+    skip_config_option,
+)
+from jira_teamlead.cli.fallback_options import FallbackOption
 from jira_teamlead.cli.jira_options import add_jira_options, set_jira_to_params
 from jira_teamlead.cli.template_options import (
     TEMPLATE_CLICK_PARAM,
-    IssueTemplateOption,
+    from_template_fallback,
     parse_yaml_option,
 )
 from jira_teamlead.jira_wrapper import JiraWrapper, SuperIssue
@@ -31,57 +35,59 @@ def get_assignees(ctx: click.Context, args: List[str], incomplete: str) -> List[
     "-tmpl",
     "--template",
     TEMPLATE_CLICK_PARAM,
+    cls=FallbackOption,
+    required=False,
     type=click.File("r", encoding="utf-8"),
-    callback=try_get_from_config(
-        parse_yaml_option, section="create-issue", option="issue_template"
-    ),
+    fallback=from_config_fallback("create-issue", option="issue_template"),
+    callback=parse_yaml_option,
 )
-@skip_config_option
 @click.option(
     "-p",
     "--project",
-    cls=IssueTemplateOption,
+    cls=FallbackOption,
+    fallback=[
+        from_template_fallback(query="project.key"),
+        from_config_fallback(section="jira", option="default_project"),
+    ],
     required=True,
     type=str,
     help="Ключ проекта",
-    template_var="project.key",
 )
+@skip_config_option
 @click.option(
     "-t",
     "--type",
     "issue_type",
-    cls=IssueTemplateOption,
+    cls=FallbackOption,
     required=True,
     type=str,
+    fallback=from_template_fallback("issuetype.name"),
     help="Тип Issue",
-    template_var="issuetype.name",
-)
-@click.option(
-    "-s",
-    "--summary",
-    cls=IssueTemplateOption,
-    required=True,
-    type=str,
-    help="Название задачи",
-    template_var="summary",
 )
 @click.option(
     "-a",
     "--assignee",
-    cls=IssueTemplateOption,
+    cls=FallbackOption,
     required=False,
     type=str,
+    fallback=from_template_fallback("assignee.name"),
     help="Исполнитель",
     autocompletion=get_assignees,
-    template_var="assignee.name",
+)
+@click.option(
+    "-s",
+    "--summary",
+    required=True,
+    type=str,
+    help="Название задачи",
 )
 def create_issue(
     jira: JiraWrapper,
     template: Optional[dict],
     project: str,
     issue_type: str,
+    assignee: Optional[str],
     summary: str,
-    assignee: str,
 ) -> None:
     """Создание Issue."""
     fields = {

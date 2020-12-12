@@ -1,6 +1,11 @@
 import click
 
-from jira_teamlead.cli.config_options import add_config_option, skip_config_option
+from jira_teamlead.cli.config_options import (
+    add_config_option,
+    from_config_fallback,
+    skip_config_option,
+)
+from jira_teamlead.cli.fallback_options import FallbackOption
 from jira_teamlead.cli.jira_options import add_jira_options
 from jira_teamlead.jira_wrapper import JiraWrapper
 
@@ -9,7 +14,15 @@ from jira_teamlead.jira_wrapper import JiraWrapper
 @add_config_option
 @add_jira_options("jira")
 @skip_config_option
-@click.option("-p", "--project", required=True, type=str, help="Ключ проекта")
+@click.option(
+    "-p",
+    "--project",
+    cls=FallbackOption,
+    required=True,
+    type=str,
+    fallback=from_config_fallback(section="jira", option="default_project"),
+    help="Ключ проекта",
+)
 @click.argument("search_string", type=str, required=False)
 def search_users(
     jira: JiraWrapper,
