@@ -1,32 +1,42 @@
 import configparser
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 import click
 
-DEFAULT_CONFIG_FILENAME = ".jtl.cfg"
-JTL_CONFIG_SECTION_PREFIX = "jtl"
-JIRA_CONFIG_SECTION = "jtl.jira"
-CREATE_ISSUE_CONFIG_SECTION = "jtl.create-issue"
-CONFIG_CLICK_CTX_PARAM = "config"
+CONFIG_CLICK_PARAM = "config"
 
 
 class Config:
     SECTION_PREFIX = "jtl"
     DEFAULT_FILENAME = ".jtl.cfg"
 
-    path: Path
+    path: Optional[Path] = None
 
-    def __init__(self, path: Optional[Path] = None) -> None:
-        if path is None:
-            path = self._get_local_path()
-
-        self.path = path
+    def __init__(self, custom_path: Optional[Union[Path, str]]) -> None:
         self._config = configparser.ConfigParser()
-        self._config.read(self.path)
+        if isinstance(custom_path, str):
+            custom_path = Path(custom_path)
+
+        self._read_config(custom_path=custom_path)
+
+    def _read_config(self, custom_path: Optional[Path]) -> None:
+        paths = [self._get_global_path(), self._get_local_path()]
+        if custom_path is not None:
+            paths.append(custom_path)
+
+        for path in reversed(paths):
+            config_file = self._config.read(path)
+            if config_file:
+                self.path = path
+                break
 
     def _get_local_path(self) -> Path:
         config_path = Path().absolute() / self.DEFAULT_FILENAME
+        return config_path
+
+    def _get_global_path(self) -> Path:
+        config_path = Path().home() / self.DEFAULT_FILENAME
         return config_path
 
     def get_full_section_name(self, section: str) -> str:
@@ -34,19 +44,14 @@ class Config:
 
     def get(self, section: str, option: str) -> Optional[str]:
         full_section_name = self.get_full_section_name(section)
-        config_section = self._config[full_section_name]
-        value = config_section.get(option)
-        return value
 
-
-# def get_configuration(config_file: Path) -> configparser.ConfigParser:
-#     config = configparser.ConfigParser()
-#     config.read(config_file)
-#     return config
-
-
-# def get_full_section_name(section: str) -> str:
-#     return "{0}.{1}".format(JTL_CONFIG_SECTION_PREFIX, section)
+        if self.path is None:
+            return None
+        try:
+            value = self._config.get(section=full_section_name, option=option)
+            return value
+        except configparser.Error:
+            return None
 
 
 def bad_parameter_for_config(
@@ -59,7 +64,7 @@ def bad_parameter_for_config(
 
     Заменяет название опций CLI на название параметра конфига и путь к файлу.
     """
-    param_hint = "[{0}].{1} (from {2})".format(section, option, config_path)
+    param_hint = "'{0}.{1}' (from {2})".format(section, option, config_path)
     new_ex = click.BadParameter(
         message=ex.message,
         ctx=ex.ctx,
@@ -67,30 +72,6 @@ def bad_parameter_for_config(
         param_hint=param_hint,
     )
     return new_ex
-
-
-# def get_config_path() -> Path:
-#     config_path = Path().absolute() / DEFAULT_CONFIG_FILENAME
-#     return config_path
-
-
-def get_appropriate_config_path(ctx: click.Context) -> configparser.ConfigParser:
-    """Получение подходящего конфига.
-
-    Конфиг из параметров (из ctx)
-    Локальный конфиг (.jtl.cfg)
-    Глобальный конфиг (~/.jtl.cfg)
-    """
-
-
-# def get_from_config(section: str, name: str) -> Optional[str]:
-#     config_path = get_config_path()
-#     config = get_configuration(config_path)
-#     full_section_name = get_full_section_name(section)
-#     config_section = config[full_section_name]
-#     value = config_section.get(name)
-
-# return value
 
 
 def try_get_from_config(
@@ -104,7 +85,7 @@ def try_get_from_config(
         if value is not None:  # filled cli
             return callback(ctx=ctx, param=param, value=value)
         else:  # empty cli
-            config = Config()
+            config = ctx.params[CONFIG_CLICK_PARAM]
             raw_config_value = config.get(section=section, option=option)
             if raw_config_value is None:  # empty cli, empty config
                 if required:  # empty cli, empty config, required=True

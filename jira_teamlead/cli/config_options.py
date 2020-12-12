@@ -1,21 +1,16 @@
 from functools import update_wrapper
-from pathlib import Path
 from typing import Any, Callable, Optional
 
 import click
 
-from jira_teamlead.cli.config import Config
+from jira_teamlead.cli.config import CONFIG_CLICK_PARAM, Config
 
 
 def parse_config_option(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
 ) -> Optional[Config]:
-    if value:
-        path = Path(value)
-        config = Config(path)
-        return config
-    else:
-        return None
+    config = Config(custom_path=value)
+    return config
 
 
 def add_config_option(f: Callable) -> Callable:
@@ -23,6 +18,7 @@ def add_config_option(f: Callable) -> Callable:
     config_option = click.option(
         "-cfg",
         "--config",
+        CONFIG_CLICK_PARAM,
         type=click.Path(),
         required=False,
         callback=parse_config_option,
@@ -40,7 +36,7 @@ def skip_config_option(f: Callable) -> Callable:
     """
 
     def wrapper(*args: Any, **kwargs: Any) -> Any:
-        kwargs.pop("config")
+        kwargs.pop(CONFIG_CLICK_PARAM)
         result = f(*args, **kwargs)
         return result
 
