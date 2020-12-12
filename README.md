@@ -31,18 +31,17 @@
 * Клонируйте данный репозиторий
 * Перейдите в основную директорию
 * Установите зависимости и основное приложение
-    ```
-    $ poetry install
-    ```
+
+      $ poetry install
+
 * Теперь jtl установлен в виртуальное окружение и доступен в нем по команде:
-    ```
-    $ jtl COMMAND [OPTIONS]
-    ```
+
+      $ jtl COMMAND [OPTIONS]
+
 * Возможна установка в систему с помощью следующих дополнительных команд:
-  ```
-  $ poetry build
-  $ pip install dist/<path_to_tar_gz_archive>
-  ```
+ 
+      $ poetry build
+      $ pip install dist/<path_to_tar_gz_archive>
 
 ## Использование
 
@@ -56,18 +55,19 @@
 |`-ja / --jira-auth`  |`auth`  | +      |Логин и пароль в формате `login:password`           |
 |`-js / --jira-server`|`server`| +      |URL сервера Jira в формате `http[s]://jira.host.net`|
 
-Примеры:
+##### Примеры:
 
-```
-$ cat my_config.cfg
-[jtl]
-server = http://localhost:8080
-auth = login:password
-$ jtl get-issue --config my_config.cfg DEV-11
-```
-```
-$ jtl get-issue --jira-server http://localhost:8080 --jira-auth login:password DEV-11
-```
+Использование конфигурационного файла:
+
+    $ cat my_config.cfg
+    [jtl]
+    server = http://localhost:8080
+    auth = login:password
+    $ jtl get-issue --config my_config.cfg DEV-11
+
+Использование параметров командной строки:
+
+    $ jtl get-issue --jira-server http://localhost:8080 --jira-auth login:password DEV-11
 
 #### Порядок поиска параметров конфигурации
 
@@ -80,29 +80,33 @@ $ jtl get-issue --jira-server http://localhost:8080 --jira-auth login:password D
 
 #### Формат конфигурационного файла
 
-```
-[jtl]
-server = http://localhost:8080
-auth = login:password
-
-[jtl.create-issue]
-template = default_issue.yaml
-
-[jtl.other-command]
-...
-```
+    [jtl.jira]
+    server = http://localhost:8080
+    auth = login:password
+    
+    [jtl.create-issue]
+    template = default_issue.yaml
+    
+    [jtl.other-command]
+    ...
 
 Конфигурационный файл делится на секции:
 
-##### `[jtl]` 
+##### `[jtl.jira]` 
 
-Секция общих конфигурационных параметров. См. раздел
+Секция общих конфигурации сервера Jira. См. раздел
 [Общие конфгигурационные параметры](#Общие-конфгигурационные-параметры)
 
 ##### `[jtl.<command-name>]`
 
 Секции параметров команды `<command-name>`. См. документацию к
 `<command-name>`
+
+#### Включение автодополнения в bash
+
+Добавьте в `~/.bashrc` команду:
+
+    eval "$(_JTL_COMPLETE=source_bash jtl)"
 
 ### Команды
 
@@ -113,31 +117,24 @@ template = default_issue.yaml
 
 Поиск конкретного пользователя в проекте DEV:
 
-```
-$ jtl search-users -p DEV alex
-alex (Alexey, alex@localhost)
-```
+    $ jtl search-users -p DEV alex
+    alex (Alexey, alex@localhost)
 
 Получение списка всех пользователей, для поля assignee в проекте DEV:
 
-```
-$ jtl search-users -p DEV
-...
-admin (Administrator, admin@localhost)
-alex (Alexey, alex@localhost)
-fred (Frederic, fred@localhost)
-...
-```
-
+    $ jtl search-users -p DEV
+    ...
+    admin (Administrator, admin@localhost)
+    alex (Alexey, alex@localhost)
+    fred (Frederic, fred@localhost)
+    ...
 
 #### Создание одного Issue
 
 Простое создание Story в проекте DEV
 
-```
-$ jtl create-issue -p DEV -t Story -s "Добавить функцию создания задачи"
-Created issue: http://localhost:8080/browse/DEV-11
-```
+    $ jtl create-issue -p DEV -t Story -s "Добавить функцию создания задачи"
+    Created issue: http://localhost:8080/browse/DEV-11
 
 Создание Story с помощью YAML-шаблона. Обязательные параметры могут быть
 заданы в шаблоне. В данном примере в шаблоне переопределены `--project` и
@@ -145,29 +142,27 @@ Created issue: http://localhost:8080/browse/DEV-11
 YAML-файла полность повторяет формат JSON-объекта передеваемый методу создания
 задачи `POST /rest/api/2/issue` в Jira REST API.
 
-Примеры:
+##### Примеры
 
-```
-$ cat issue.yaml
-project:
-  key: DEV
-issuetype:
-  name: Story
+Создание с использованием шаблона:
 
-$ jtl create-issue -tmpl issue.yaml -s "Добавить функцию создания задачи"
-Created issue: http://localhost:8080/browse/DEV-11
-```
+    $ cat issue.yaml
+    project:
+      key: DEV
+    issuetype:
+      name: Story
+    
+    $ jtl create-issue -tmpl issue.yaml -s "Добавить функцию создания задачи"
+    Created issue: http://localhost:8080/browse/DEV-11
 
 Путь к файлу шаблона может быть указан в конфигурационном файле
 
-```
-$ cat ~/.jtl.cfg
-[jtl.create-issue]
-issue_template = issue.yaml
-
-$ jtl create-issue -s "Добавить функцию создания задачи"
-Created issue: http://localhost:8080/browse/DEV-11
-```
+    $ cat ~/.jtl.cfg
+    [jtl.create-issue]
+    issue_template = issue.yaml
+    
+    $ jtl create-issue -s "Добавить функцию создания задачи"
+    Created issue: http://localhost:8080/browse/DEV-11
 
 TODO: Добавить пример с многострочным description
 
@@ -177,53 +172,49 @@ TODO: Добавить пример с многострочным description
 возвращаемого методом получения данных задачи
 `GET /rest/api/2/issue/{issueIdOrKey}` в Jira REST API.
 
-```
-$ jtl get-issue DEV-11
-...
-created: 2020-12-07T03:51:53.185+0300
-summary: Добавить функцию создания задачи
-issuetype:
-  description: ''
-  id: '10001'
-  name: Story
-...
-```
+    $ jtl get-issue DEV-11
+    ...
+    created: 2020-12-07T03:51:53.185+0300
+    summary: Добавить функцию создания задачи
+    issuetype:
+      description: ''
+      id: '10001'
+      name: Story
+    ...
 
 #### Пакетное создание задач
 
-```
-$ cat issues.yaml
-jtl_template:
-  project:
-    key: "DEV"
-  labels:
-    - "dreamteam"
-    - "refactoring"
-  customfield_10104: 1    # Sprint value
-jtl_issues:
-  - summary: "Refactoring the issue creation function"
-    description: "Very detailed description..."
-    issuetype:
-      name: Story
-    assignee:
-      name: "admin"
-    jtl_sub_issues:
-      - summary: "[Frontend] Refactoring the issue creation function"
+    $ cat issues.yaml
+    jtl_template:
+      project:
+        key: "DEV"
+      labels:
+        - "dreamteam"
+        - "refactoring"
+      customfield_10104: 1    # Sprint value
+    jtl_issues:
+      - summary: "Refactoring the issue creation function"
+        description: "Very detailed description..."
         issuetype:
-          name: Task
+          name: Story
         assignee:
-          name: "frontend.developer"
-      - summary: "[Backend] Refactoring the issue creation function"
-        issuetype:
-          name: Task
-        assignee:
-          name: "frontend.developer"
-
-$ jtl create-issue-set issues.yaml
-Created super-issue: http://localhost:8080/browse/DEV-13
-    Created sub-issue: http://localhost:8080/browse/DEV-14
-    Created sub-issue: http://localhost:8080/browse/DEV-15
-```
+          name: "admin"
+        jtl_sub_issues:
+          - summary: "[Frontend] Refactoring the issue creation function"
+            issuetype:
+              name: Task
+            assignee:
+              name: "frontend.developer"
+          - summary: "[Backend] Refactoring the issue creation function"
+            issuetype:
+              name: Task
+            assignee:
+              name: "frontend.developer"
+    
+    $ jtl create-issue-set issues.yaml
+    Created super-issue: http://localhost:8080/browse/DEV-13
+        Created sub-issue: http://localhost:8080/browse/DEV-14
+        Created sub-issue: http://localhost:8080/browse/DEV-15
 
 Все поля в YAML-файле в формате, полностью повторяющем формат JSON-объекта, 
 получаемого методом создания задачи `POST /rest/api/2/issue` в Jira REST API, 
