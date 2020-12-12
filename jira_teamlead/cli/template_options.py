@@ -4,7 +4,7 @@ from typing import Any, Optional
 import click
 import yaml
 
-TEMPLATE_CLICK_CTX_PARAM = "jtl_template"
+TEMPLATE_CLICK_PARAM = "template"
 
 
 def parse_template_option(
@@ -30,7 +30,7 @@ class IssueTemplateOption(click.Option):
     def value_from_template(self, ctx: click.Context) -> Optional[str]:
         if self.template_var is not None:
             parts = self.template_var.split(".")
-            value = ctx.params[TEMPLATE_CLICK_CTX_PARAM]
+            value = ctx.params[TEMPLATE_CLICK_PARAM]
             for part in parts:
                 value = value.get(part)
                 if value is None:

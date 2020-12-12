@@ -5,9 +5,11 @@ import click
 import yaml
 
 from jira_teamlead import jtl_fields
+from jira_teamlead.cli.config import try_get_from_config
 from jira_teamlead.cli.config_options import add_config_option, skip_config_option
 from jira_teamlead.cli.jira_options import add_jira_options
 from jira_teamlead.cli.template_options import (
+    TEMPLATE_CLICK_PARAM,
     IssueTemplateOption,
     parse_template_option,
 )
@@ -20,9 +22,11 @@ from jira_teamlead.jira_wrapper import JiraWrapper, SuperIssue
 @click.option(
     "-tmpl",
     "--template",
-    required=False,
-    callback=parse_template_option,
+    TEMPLATE_CLICK_PARAM,
     type=click.File(),
+    callback=try_get_from_config(
+        parse_template_option, section="create-issue", option="issue_template"
+    ),
 )
 @skip_config_option
 @click.option(

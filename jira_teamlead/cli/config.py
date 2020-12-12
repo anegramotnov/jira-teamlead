@@ -75,7 +75,7 @@ def bad_parameter_for_config(
 
 
 def try_get_from_config(
-    callback: Callable, section: str, option: str, required: bool = False
+    custom_parser: Callable, section: str, option: str, required: bool = False
 ) -> Callable:
     """Извлечение значения из конфига, если не была передана опция CLI."""
 
@@ -83,7 +83,7 @@ def try_get_from_config(
         ctx: click.Context, param: click.Parameter, value: str
     ) -> Optional[str]:
         if value is not None:  # filled cli
-            return callback(ctx=ctx, param=param, value=value)
+            return custom_parser(ctx=ctx, param=param, value=value)
         else:  # empty cli
             config = ctx.params[CONFIG_CLICK_PARAM]
             raw_config_value = config.get(section=section, option=option)
@@ -93,8 +93,9 @@ def try_get_from_config(
                 else:  # empty cli, empty config, required=False
                     return None
             try:  # empty cli, filled config
-                value_from_config = callback(
-                    ctx=ctx, param=param, value=raw_config_value
+                converted_value = param.full_process_value(ctx, raw_config_value)
+                parsed_value = custom_parser(
+                    ctx=ctx, param=param, value=converted_value
                 )
             except click.BadParameter as ex:  # empty cli, incorrect config
                 raise bad_parameter_for_config(
@@ -104,6 +105,6 @@ def try_get_from_config(
                     option=option,
                 )
             else:  # empty cli, correct config
-                return value_from_config
+                return parsed_value
 
     return wrapped

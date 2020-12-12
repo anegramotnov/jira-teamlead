@@ -43,22 +43,23 @@ def test_create_issue(JIRA_MOCK, runner):
     issue_mock.key = "LOL-1"
 
     jira_mock.create_issue.return_value = issue_mock
-
-    result = runner.invoke(
-        create_issue,
-        [
-            "-js",
-            "http://lol.wut",
-            "-ja",
-            "lol:wut",
-            "-p",
-            "LOL",
-            "-t",
-            "Lol",
-            "-s",
-            "test task",
-        ],
-    )
+    with mock.patch("jira_teamlead.cli.config.Config.get") as get_from_config:
+        get_from_config.return_value = None
+        result = runner.invoke(
+            create_issue,
+            [
+                "-js",
+                "http://lol.wut",
+                "-ja",
+                "lol:wut",
+                "-p",
+                "LOL",
+                "-t",
+                "Lol",
+                "-s",
+                "test task",
+            ],
+        )
     assert result.exit_code == 0
     assert result.output == "Created issue: http://lol.wut/browse/LOL-1\n"
 
