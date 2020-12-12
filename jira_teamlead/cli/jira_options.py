@@ -27,6 +27,12 @@ jira_options = (
 )
 
 
+def set_jira_to_params(params: dict) -> None:
+    server = params.pop("server")
+    auth = params.pop("auth")
+    params["jira"] = JiraWrapper(server=server, auth=auth)
+
+
 def add_jira_options(name: str) -> Callable:
     """Декоратор добавления параметров соединения к серверу.
 
@@ -38,12 +44,9 @@ def add_jira_options(name: str) -> Callable:
         for option in reversed(jira_options):
             f = option(f)
 
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            server = kwargs.pop("server")
-            auth = kwargs.pop("auth")
-            kwargs[name] = JiraWrapper(server=server, auth=auth)
-            result = f(*args, **kwargs)
-            return result
+        def wrapper(**kwargs: Any) -> Any:
+            set_jira_to_params(kwargs)
+            f(**kwargs)
 
         return update_wrapper(wrapper, f)
 

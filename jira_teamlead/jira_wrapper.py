@@ -67,12 +67,12 @@ class JiraWrapper:
 
     def create_issue_set(
         self,
-        issue_set: List[dict],
+        issues: List[dict],
         template: Optional[dict] = None,
     ) -> List[IssueWrapper]:
-        issues: List[IssueWrapper] = []
+        templated_issues: List[IssueWrapper] = []
 
-        for original_issue_fields in issue_set:
+        for original_issue_fields in issues:
 
             issue_fields = self._override_from_template(
                 original_fields=original_issue_fields,
@@ -84,12 +84,12 @@ class JiraWrapper:
                 super_issue = self.create_super_issue(
                     fields=issue_fields, sub_issues=sub_issues
                 )
-                issues.append(super_issue)
+                templated_issues.append(super_issue)
             else:
                 issue = self.create_issue(fields=issue_fields)
-                issues.append(issue)
+                templated_issues.append(issue)
 
-        return issues
+        return templated_issues
 
     def create_super_issue(self, fields: dict, sub_issues: List[dict]) -> SuperIssue:
         """Создать задачу, содержащее подзадачи."""

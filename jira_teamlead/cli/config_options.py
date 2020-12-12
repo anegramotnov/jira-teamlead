@@ -19,7 +19,7 @@ def add_config_option(f: Callable) -> Callable:
         "-cfg",
         "--config",
         CONFIG_CLICK_PARAM,
-        type=click.Path(),
+        type=click.Path(exists=True, dir_okay=False),
         required=False,
         callback=parse_config_option,
         help="Путь к файлу конфигурации",

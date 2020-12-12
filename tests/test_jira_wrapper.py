@@ -56,7 +56,7 @@ def test_create_issue_set(JIRA_MOCK):
     jira_wrapper = JiraWrapper(server="http://lol.wut", auth=("lol", "wut"))
 
     result = jira_wrapper.create_issue_set(
-        issue_set=[
+        issues=[
             {
                 "summary": "Test issue",
                 "issuetype": "Story",

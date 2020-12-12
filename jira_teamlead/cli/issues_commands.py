@@ -1,5 +1,4 @@
-import io
-from typing import Optional
+from typing import List, Optional
 
 import click
 import yaml
@@ -7,13 +6,22 @@ import yaml
 from jira_teamlead import jtl_fields
 from jira_teamlead.cli.config import try_get_from_config
 from jira_teamlead.cli.config_options import add_config_option, skip_config_option
-from jira_teamlead.cli.jira_options import add_jira_options
+from jira_teamlead.cli.jira_options import add_jira_options, set_jira_to_params
 from jira_teamlead.cli.template_options import (
     TEMPLATE_CLICK_PARAM,
     IssueTemplateOption,
-    parse_template_option,
+    parse_yaml_option,
 )
 from jira_teamlead.jira_wrapper import JiraWrapper, SuperIssue
+
+
+def get_assignees(ctx: click.Context, args: List[str], incomplete: str) -> List[str]:
+    set_jira_to_params(ctx.params)
+    jira: JiraWrapper = ctx.params["jira"]
+    project: str = ctx.params["project"]
+    users = jira.search_users(project=project, search_string=incomplete)
+    usernames = [u.name for u in users]
+    return usernames
 
 
 @click.command()
@@ -23,9 +31,9 @@ from jira_teamlead.jira_wrapper import JiraWrapper, SuperIssue
     "-tmpl",
     "--template",
     TEMPLATE_CLICK_PARAM,
-    type=click.File(),
+    type=click.File("r", encoding="utf-8"),
     callback=try_get_from_config(
-        parse_template_option, section="create-issue", option="issue_template"
+        parse_yaml_option, section="create-issue", option="issue_template"
     ),
 )
 @skip_config_option
@@ -57,12 +65,23 @@ from jira_teamlead.jira_wrapper import JiraWrapper, SuperIssue
     help="Название задачи",
     template_var="summary",
 )
+@click.option(
+    "-a",
+    "--assignee",
+    cls=IssueTemplateOption,
+    required=False,
+    type=str,
+    help="Исполнитель",
+    autocompletion=get_assignees,
+    template_var="assignee.name",
+)
 def create_issue(
     jira: JiraWrapper,
     template: Optional[dict],
     project: str,
     issue_type: str,
     summary: str,
+    assignee: str,
 ) -> None:
     """Создание Issue."""
     fields = {
@@ -75,6 +94,10 @@ def create_issue(
         "summary": summary,
     }
 
+    if assignee is not None:
+        assignee_field = {"assignee": {"name": assignee}}
+        fields.update(assignee_field)
+
     created_issue = jira.create_issue(fields=fields, template=template)
 
     click.echo(f"Created issue: {jira.server}/browse/{created_issue.key}")
@@ -84,16 +107,16 @@ def create_issue(
 @add_config_option
 @add_jira_options("jira")
 @skip_config_option
-@click.argument("issue_set_file", type=click.File("r", encoding="utf-8"))
-def create_issue_set(jira: JiraWrapper, issue_set_file: io.TextIOWrapper) -> None:
+@click.argument(
+    "issue_set", type=click.File("r", encoding="utf-8"), callback=parse_yaml_option
+)
+def create_issue_set(jira: JiraWrapper, issue_set: dict) -> None:
     """Создание набора Issue из yaml-файла ISSUE_SET_FILE."""
-    issue_set_data = yaml.safe_load(issue_set_file)
-
-    issue_set = issue_set_data[jtl_fields.ISSUE_SET_FIELD]
-    issue_template = issue_set_data.get(jtl_fields.TEMPLATE_FIELD)
+    issues = issue_set[jtl_fields.ISSUE_SET_FIELD]
+    issue_template = issue_set.get(jtl_fields.TEMPLATE_FIELD)
 
     issues = jira.create_issue_set(
-        issue_set=issue_set,
+        issues=issues,
         template=issue_template,
     )
 

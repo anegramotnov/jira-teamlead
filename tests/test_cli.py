@@ -105,7 +105,7 @@ def test_create_issue_set(JIRA_MOCK, runner):
         assert result.exit_code == 0
         assert result.output == "Created issue: http://lol.wut/browse/LOL-1\n"
         jira_mock.create_issue_set.assert_called_once_with(
-            issue_set=[
+            issues=[
                 {
                     "summary": "Test Summary",
                     "issuetype": {"name": "Lol"},
