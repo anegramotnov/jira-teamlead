@@ -35,7 +35,7 @@ def assignee_autocompletion(
 @add_config_option
 @add_jira_options("jira")
 @click.option(
-    "-tmpl",
+    "-tl",
     "--template",
     TEMPLATE_CLICK_PARAM,
     cls=FallbackOption,
