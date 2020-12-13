@@ -2,8 +2,6 @@ import configparser
 from pathlib import Path
 from typing import Optional, Union
 
-CONFIG_CLICK_PARAM = "config"
-
 
 class Config:
     SECTION_PREFIX = "jtl"

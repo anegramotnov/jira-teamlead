@@ -26,7 +26,7 @@ def test_search_users(JIRA_MOCK, runner):
     jira_mock.search_users.return_value = [user_1]
 
     result = runner.invoke(
-        search_users, ["-js", "http://lol.wut", "-ja", "lol:wut", "-p", "LOL"]
+        search_users, ["-js", "http://lol.wut", "-jl", "lol", "-jp", "wut", "-p", "LOL"]
     )
     assert result.exit_code == 0
     assert result.output == "test (Test test, email at lol dot wut)\n"
@@ -43,15 +43,17 @@ def test_create_issue(JIRA_MOCK, runner):
     issue_mock.key = "LOL-1"
 
     jira_mock.create_issue.return_value = issue_mock
-    with mock.patch("jira_teamlead.cli.config.Config.get") as get_from_config:
+    with mock.patch("jira_teamlead.config.Config.get") as get_from_config:
         get_from_config.return_value = None
         result = runner.invoke(
             create_issue,
             [
                 "-js",
                 "http://lol.wut",
-                "-ja",
-                "lol:wut",
+                "-jl",
+                "lol",
+                "-jp",
+                "wut",
                 "-p",
                 "LOL",
                 "-t",
@@ -100,7 +102,7 @@ def test_create_issue_set(JIRA_MOCK, runner):
 
         result = runner.invoke(
             create_issue_set,
-            ["-js", "http://lol.wut", "-ja", "lol:wut", "test_issues.yaml"],
+            ["-js", "http://lol.wut", "-jl", "lol", "-jp", "wut", "test_issues.yaml"],
         )
         assert result.exit_code == 0
         assert result.output == "Created issue: http://lol.wut/browse/LOL-1\n"

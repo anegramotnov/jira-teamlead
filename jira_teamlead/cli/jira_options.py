@@ -5,35 +5,52 @@ import click
 
 from jira_teamlead.cli.config_options import from_config_fallback
 from jira_teamlead.cli.fallback_options import FallbackOption
-from jira_teamlead.cli.validators import parse_auth_option, parse_server_option
+from jira_teamlead.cli.validators import parse_server_option
 from jira_teamlead.jira_wrapper import JiraWrapper
+
+SERVER_CLICK_PARAM = "server"
+LOGIN_CLICK_PARAM = "login"
+PASSWORD_CLICK_PARAM = "password"
+JIRA_CLICK_PARAM = "jira"
+
 
 jira_options = (
     click.option(
         "-js",
         "--server",
+        SERVER_CLICK_PARAM,
         cls=FallbackOption,
         required=True,
-        fallback=from_config_fallback(section="jira", option="server"),
+        fallback=from_config_fallback(section="jira", option=SERVER_CLICK_PARAM),
         callback=parse_server_option,
         help="Cервер Jira",
     ),
     click.option(
-        "-ja",
-        "--auth",
+        "-jl",
+        "--login",
+        LOGIN_CLICK_PARAM,
         cls=FallbackOption,
-        fallback=from_config_fallback(section="jira", option="auth"),
+        fallback=from_config_fallback(section="jira", option=LOGIN_CLICK_PARAM),
         required=True,
-        callback=parse_auth_option,
-        help="Учетные данные в формате 'login:password'",
+        help="Логин в Jira",
+    ),
+    click.option(
+        "-jp",
+        "--password",
+        PASSWORD_CLICK_PARAM,
+        cls=FallbackOption,
+        fallback=from_config_fallback(section="jira", option=PASSWORD_CLICK_PARAM),
+        required=True,
+        help="Пароль в Jira",
     ),
 )
 
 
 def set_jira_to_params(params: dict) -> None:
-    server = params.pop("server")
-    auth = params.pop("auth")
-    params["jira"] = JiraWrapper(server=server, auth=auth)
+    server = params.pop(SERVER_CLICK_PARAM)
+    login = params.pop(LOGIN_CLICK_PARAM)
+    password = params.pop(PASSWORD_CLICK_PARAM)
+    params[JIRA_CLICK_PARAM] = JiraWrapper(server=server, auth=(login, password))
 
 
 def add_jira_options(name: str) -> Callable:

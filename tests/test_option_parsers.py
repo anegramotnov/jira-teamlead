@@ -1,17 +1,7 @@
 import click
 import pytest
 
-from jira_teamlead.cli.validators import parse_auth_option, parse_server_option
-
-
-@pytest.mark.parametrize("value", ("", "lol", "lol:wut:lol", ":lol", "wut:", "лол:што"))
-def test_parse_auth_fail(value):
-    with pytest.raises(click.BadParameter):
-        parse_auth_option(None, None, value)
-
-
-def test_parse_auth_ok():
-    assert parse_auth_option(None, None, "lol:wut") == ("lol", "wut")
+from jira_teamlead.cli.validators import parse_server_option
 
 
 @pytest.mark.parametrize("value", ("", "lol", "lol.wut.lol", "http:lol.wut"))

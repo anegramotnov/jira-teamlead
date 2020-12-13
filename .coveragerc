@@ -5,5 +5,4 @@ source = jira_teamlead/
 omit = ["tests/*"]
 
 [report]
-fail_under = 70
-
+fail_under = 80
