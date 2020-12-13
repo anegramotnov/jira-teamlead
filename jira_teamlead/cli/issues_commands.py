@@ -19,8 +19,11 @@ from jira_teamlead.cli.template_options import (
 from jira_teamlead.jira_wrapper import JiraWrapper, SuperIssue
 
 
-def get_assignees(ctx: click.Context, args: List[str], incomplete: str) -> List[str]:
+def assignee_autocompletion(
+    ctx: click.Context, args: List[str], incomplete: str
+) -> List[str]:
     set_jira_to_params(ctx.params)
+
     jira: JiraWrapper = ctx.params["jira"]
     project: str = ctx.params["project"]
     users = jira.search_users(project=project, search_string=incomplete)
@@ -72,7 +75,7 @@ def get_assignees(ctx: click.Context, args: List[str], incomplete: str) -> List[
     type=str,
     fallback=from_template_fallback("assignee.name"),
     help="Исполнитель",
-    autocompletion=get_assignees,
+    autocompletion=assignee_autocompletion,
 )
 @click.option(
     "-s",

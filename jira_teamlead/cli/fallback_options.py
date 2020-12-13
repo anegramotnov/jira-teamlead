@@ -4,8 +4,19 @@ import click
 
 
 class FallbackOption(click.Option):
+    """Опция, которая при отсутствии параметра CLI, извлекает значение из других мест.
+
+    Attributes:
+        fallbacks: Список коллбэков для попытки извлечения значения, выполняются по
+            порядку.
+        fallback_hint: Строка, отображаемая в сообщениях об ошибках, связанных с
+            параметром. Должна быть присвоена оъекту в функции fallback для дальнейшей
+            передачи в `click.BadParameter(..., param_hint)`.
+
+    """
+
     fallbacks: List[Callable]
-    param_hint: Optional[str] = None
+    fallback_hint: Optional[str] = None
 
     def __init__(
         self,
@@ -34,6 +45,6 @@ class FallbackOption(click.Option):
         try:
             return super().handle_parse_result(ctx, opts, args)
         except click.BadParameter as e:
-            if self.param_hint is not None:
-                e.param_hint = self.param_hint
+            if self.fallback_hint is not None:
+                e.param_hint = self.fallback_hint
             raise

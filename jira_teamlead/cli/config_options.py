@@ -46,12 +46,12 @@ def skip_config_option(f: Callable) -> Callable:
 
 def from_config_fallback(section: str, option: str) -> Callable:
     def fallback(ctx: click.Context, param: FallbackOption) -> Optional[str]:
-        config = ctx.params[CONFIG_CLICK_PARAM]
+        config: Config = ctx.params[CONFIG_CLICK_PARAM]
         value = config.get(section=section, option=option)
         if value is not None:
-            # override e.param_hint
-            param.param_hint = "'{0}.{1}' (from {2})".format(
-                section, option, config.path
+            # for override e.param_hint
+            param.fallback_hint = "'{0}.{1}' (from {2})".format(
+                config.get_full_section_name(section), option, config.path
             )
         return value
 
