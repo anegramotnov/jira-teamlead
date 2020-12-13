@@ -20,7 +20,8 @@ from jira_teamlead.jira_wrapper import JiraWrapper
     cls=FallbackOption,
     required=True,
     type=str,
-    fallback=from_config_fallback(section="jira", option="default_project"),
+    fallback=from_config_fallback(section="defaults", option="project"),
+    prompt=True,
     help="Ключ проекта",
 )
 @click.argument("search_string", type=str, required=False)

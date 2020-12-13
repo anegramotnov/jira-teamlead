@@ -47,7 +47,7 @@ def assignee_autocompletion(
     cls=FallbackOption,
     required=False,
     type=click.File("r", encoding="utf-8"),
-    fallback=from_config_fallback(section="create-issue", option="template"),
+    fallback=from_config_fallback(section="defaults.create-issue", option="template"),
     callback=parse_yaml_option,
     help="Файл с шаблоном Issue",
 )
@@ -61,6 +61,7 @@ def assignee_autocompletion(
         from_config_fallback(section="jira", option="default_project"),
     ],
     required=True,
+    prompt=True,
     type=str,
     help="Ключ проекта",
 )
@@ -71,6 +72,7 @@ def assignee_autocompletion(
     "issue_type",
     cls=FallbackOption,
     required=True,
+    prompt=True,
     type=str,
     fallback=from_template_fallback("issuetype.name"),
     help="Тип Issue",
@@ -89,6 +91,7 @@ def assignee_autocompletion(
     "-s",
     "--summary",
     required=True,
+    prompt=True,
     type=str,
     help="Название задачи",
 )

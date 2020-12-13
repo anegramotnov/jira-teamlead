@@ -20,9 +20,10 @@ jira_options = (
         "--server",
         SERVER_CLICK_PARAM,
         cls=FallbackOption,
-        required=True,
         fallback=from_config_fallback(section="jira", option=SERVER_CLICK_PARAM),
         callback=parse_server_option,
+        required=True,
+        prompt=True,
         help="Cервер Jira",
     ),
     click.option(
@@ -32,6 +33,7 @@ jira_options = (
         cls=FallbackOption,
         fallback=from_config_fallback(section="jira", option=LOGIN_CLICK_PARAM),
         required=True,
+        prompt=True,
         help="Логин в Jira",
     ),
     click.option(
@@ -41,6 +43,8 @@ jira_options = (
         cls=FallbackOption,
         fallback=from_config_fallback(section="jira", option=PASSWORD_CLICK_PARAM),
         required=True,
+        prompt=True,
+        hide_input=True,
         help="Пароль в Jira",
     ),
 )
