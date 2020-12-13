@@ -12,11 +12,15 @@ class FallbackOption(click.Option):
         fallback_hint: Строка, отображаемая в сообщениях об ошибках, связанных с
             параметром. Должна быть присвоена оъекту в функции fallback для дальнейшей
             передачи в `click.BadParameter(..., param_hint)`.
+        fallback_required: Параметр, замещающий стандартный `required`. Служит для
+            переноса логики required в текущий класс. Например, для устранения
+            добавление пометки [required] в строку помощи параметра.
 
     """
 
     fallbacks: List[Callable]
     fallback_hint: Optional[str] = None
+    fallback_required: bool = False
 
     def __init__(
         self,
@@ -25,6 +29,8 @@ class FallbackOption(click.Option):
     ) -> None:
         fallback = kwargs.pop("fallback")
         self.fallbacks = [fallback] if not isinstance(fallback, list) else fallback
+
+        self.fallback_required = kwargs.pop("required")
 
         super().__init__(*args, **kwargs)
 
@@ -48,3 +54,9 @@ class FallbackOption(click.Option):
             if self.fallback_hint is not None:
                 e.param_hint = self.fallback_hint
             raise
+
+    def full_process_value(self, ctx: click.Context, value: Any) -> Any:
+        value = super().full_process_value(ctx, value)
+        if self.fallback_required and self.value_is_missing(value):
+            raise click.MissingParameter(ctx=ctx, param=self)
+        return value

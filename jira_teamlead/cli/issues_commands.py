@@ -43,6 +43,7 @@ def assignee_autocompletion(
     type=click.File("r", encoding="utf-8"),
     fallback=from_config_fallback("create-issue", option="issue_template"),
     callback=parse_yaml_option,
+    help="Файл с шаблоном Issue",
 )
 @click.option(
     "-p",
