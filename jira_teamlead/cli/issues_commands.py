@@ -1,3 +1,4 @@
+import webbrowser
 from typing import List, Optional
 
 import click
@@ -95,6 +96,17 @@ def assignee_autocompletion(
     type=str,
     help="Название задачи",
 )
+@click.option(
+    "--open/--no-open",
+    "open_link",
+    cls=FallbackOption,
+    required=True,
+    is_flag=True,
+    default=True,
+    prompt=True,
+    fallback=from_config_fallback(section="defaults.create-issue", option="open_link"),
+    help="Открыть созданные задачи в браузере",
+)
 def create_issue(
     jira: JiraWrapper,
     template: Optional[dict],
@@ -102,6 +114,7 @@ def create_issue(
     issue_type: str,
     assignee: Optional[str],
     summary: str,
+    open_link: bool,
 ) -> None:
     """Создание Issue."""
     fields = {
@@ -120,7 +133,9 @@ def create_issue(
 
     created_issue = jira.create_issue(fields=fields, template=template)
 
-    click.echo(f"Created issue: {jira.server}/browse/{created_issue.key}")
+    click.echo(f"Created issue: {created_issue.link}")
+    if open_link:
+        webbrowser.open_new_tab(created_issue.link)
 
 
 @click.command()

@@ -13,10 +13,14 @@ class IssueWrapper:
     lib_issue: Issue
     key: str
     summary: str
+    link: str
 
     @classmethod
-    def from_lib(cls: Type[IssueType], issue: Issue) -> IssueType:
-        return cls(lib_issue=issue, key=issue.key, summary=issue.fields.summary)
+    def from_lib(cls: Type[IssueType], issue: Issue, server: str) -> IssueType:
+        link = "{0}/browse/{1}".format(server, issue.key)
+        return cls(
+            lib_issue=issue, key=issue.key, summary=issue.fields.summary, link=link
+        )
 
 
 @dataclass
@@ -61,7 +65,7 @@ class JiraWrapper:
 
         created_lib_issue = self.jira.create_issue(**issue_fields)
 
-        issue = IssueWrapper.from_lib(issue=created_lib_issue)
+        issue = IssueWrapper.from_lib(issue=created_lib_issue, server=self.server)
 
         return issue
 
@@ -95,7 +99,7 @@ class JiraWrapper:
         """Создать задачу, содержащее подзадачи."""
         created_issue = self.create_issue(fields=fields)
 
-        issue = SuperIssue.from_lib(issue=created_issue.lib_issue)
+        issue = SuperIssue.from_lib(issue=created_issue.lib_issue, server=self.server)
 
         for sub_issue_extra_fields in sub_issues:
             sub_issue = self.create_sub_issue(
@@ -149,7 +153,7 @@ class JiraWrapper:
 
         created_issue = self.create_issue(fields=sub_issue_fields)
 
-        sub_issue = SubIssue.from_lib(issue=created_issue.lib_issue)
+        sub_issue = SubIssue.from_lib(issue=created_issue.lib_issue, server=self.server)
 
         return sub_issue
 
@@ -177,6 +181,6 @@ class JiraWrapper:
     def get_issue(self, issue_id: str) -> IssueWrapper:
         lib_issue = self.jira.issue(id=issue_id)
 
-        issue = IssueWrapper.from_lib(issue=lib_issue)
+        issue = IssueWrapper.from_lib(issue=lib_issue, server=self.server)
 
         return issue

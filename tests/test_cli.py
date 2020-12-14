@@ -37,10 +37,9 @@ def test_search_users(JIRA_MOCK, runner):
 @mock.patch("jira_teamlead.cli.jira_options.JiraWrapper")
 def test_create_issue(JIRA_MOCK, runner):
     jira_mock = JIRA_MOCK.return_value
-    jira_mock.server = "http://lol.wut"
 
     issue_mock = mock.MagicMock()
-    issue_mock.key = "LOL-1"
+    issue_mock.link = "http://lol.wut/browse/LOL-1"
 
     jira_mock.create_issue.return_value = issue_mock
     with mock.patch("jira_teamlead.config.Config.get") as get_from_config:
@@ -60,6 +59,7 @@ def test_create_issue(JIRA_MOCK, runner):
                 "Lol",
                 "-s",
                 "test task",
+                "--no-open",
             ],
         )
     assert result.exit_code == 0
