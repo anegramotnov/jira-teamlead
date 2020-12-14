@@ -19,7 +19,7 @@ def parse_config_option(
 def add_config_option(f: Callable) -> Callable:
     """Добавить опцию конфига."""
     config_option = click.option(
-        "-cfg",
+        "-jc",
         "--config",
         CONFIG_CLICK_PARAM,
         type=click.Path(exists=True, dir_okay=False),

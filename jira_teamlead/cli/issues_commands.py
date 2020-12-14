@@ -58,7 +58,7 @@ def assignee_autocompletion(
     cls=FallbackOption,
     fallback=[
         from_template_fallback(query="project.key"),
-        from_config_fallback(section="jira", option="default_project"),
+        from_config_fallback(section="defaults", option="project"),
     ],
     required=True,
     prompt=True,

@@ -53,17 +53,24 @@
     $ poetry shell
     $ jtl --help
 
-* [Опционально] Для включения автодополнения, добавьте в `~/.bashrc`
-  следующую строку:
+### Включение автодополнения (опционально)
 
-      eval "$(_JTL_COMPLETE=source_bash jtl)"
+Автодополнение существенно облегчает работу в jtl, так как кроме дополнения
+вложенных команд или названий опций командной строки, работает для параметров,
+относящихся к данным Jira -- значения опций `assignee`,
+`issuetype` (в разработке), `sprint` (в разработке) и т.п.
+
+Для включения автодополнения, добавьте в `~/.bashrc` следующую строку:
+
+    eval "$(_JTL_COMPLETE=source_bash jtl)"
   
-  Перезагрузите `~/.bashrc` для включения автодополнения в текущей сессии
+Перезагрузите `~/.bashrc` для включения автодополнения в текущей сессии
 
-      $ source ~/.bashrc 
+    $ source ~/.bashrc 
   
   > См. справку по настройке автодополнения библиотеки Click
   https://click.palletsprojects.com/en/7.x/bashcomplete/#activation
+
 
 ## Конфигурация
 
@@ -110,7 +117,7 @@
 |`password`|`-jp / --password`| +      |Пароль в Jira |
 
 > __Поле `password` хранится в открытом виде!__ Во избежание риска
-  компрометации, можно использовать prompt-ввод.
+  компрометации, можно использовать для `password` prompt-ввод.
 
 #### `[jtl.defaults]`
 
@@ -162,56 +169,82 @@
     
     $ jtl search-users -p DEV
     ...
-    
-    
-    
-
-
 
 ## Команды
 
-#### Поиск пользователей
+### Общие опции
 
-Служит для поиска логина пользователей, которые можно потом использовать в
-качестве идентификаторов для поля assignee.
+|CLI               |Config               |Required|Описание             |
+|------------------|---------------------|--------|---------------------|
+|`-jc / --config`  | -                   | -      |Конфигурационный файл|
+|`-js / --server`  |`[jtl.jira] server`  | +      |Сервера Jira         |
+|`-jl / --login`   |`[jtl.jira] login`   | +      |Логин в Jira         |
+|`-jp / --password`|`[jtl.jira] password`| +      |Пароль в Jira        |
+
+
+### get-assignee
+
+Вывод списка пользователей, доступных для поля `assignee`
 
 Поиск конкретного пользователя в проекте DEV:
 
-    $ jtl search-users -p DEV alex
-    alex (Alexey, alex@localhost)
+    $ jtl get-assignee -p DEV alek
+    aleksey.alekseev (Aleksey Alekseev, aleks@localhost)
+    #
+    # assignee.name   a.displayName     a.emailAddress
 
-Получение списка всех пользователей, для поля assignee в проекте DEV:
+Получение списка всех пользователей в проекте DEV:
 
     $ jtl search-users -p DEV
     ...
     admin (Administrator, admin@localhost)
-    alex (Alexey, alex@localhost)
-    fred (Frederic, fred@localhost)
+    aleksey.alekseev (Aleksey Alekseev, alex@localhost)
+    andrey.andreev (Andrey Andreev, andrey@localhost)
     ...
 
-#### Создание одной задачи
+#### Опции
 
-##### Примеры
+|CLI               |Config                  |Required|Описание  |
+|------------------|------------------------|--------|----------|
+|`-p / --project`  |`[jtl.defaults] project`| +      |ID проекта|
 
-Простое создание Story в проекте DEV
 
-    $ jtl create-issue -p DEV -t Story -s "Добавить функцию создания задачи"
-    Created issue: http://localhost:8080/browse/DEV-11
+### create-issue
 
-Обязательные параметры могут быть заданы в шаблоне (например, `--project` и
-`--type`):
+Создание задачи
 
-    $ cat issue.yaml
-    project:
-      key: DEV
-    issuetype:
-      name: Story
+Простое создание Story
+
+    $ jtl create-issue -t Story -s "Добавить команду создания задач"
+    Created issue: http://localhost:8080/browse/DEV-123
+
+Поля задачи могут быть заданы в шаблоне
     
-    $ jtl create-issue -tmpl issue.yaml -s "Добавить функцию создания задачи"
-    Created issue: http://localhost:8080/browse/DEV-11
+    $ cat issue.yaml
+    labels:
+      - MyBeautifulTeam
+    issuetype:
+      name: "Story"
+    
+    $ jtl create-issue -jt issue.yaml -s "Добавить команду создания задач"
+    Created issue: http://localhost:8080/browse/DEV-123
+    
+    $ jtl get-issue DEV-123
+    ...
+    summary: Добавить команду создания задач
+    ...
+    issutype:
+      ...
+      - name: Story
+      ...
+    labels:
+      - MyBeautifulTeam
+    ...
 
-> Структура объектов полностью соответствуют структуре объектов JSON в REST
-  API Jira, за исключением служебных полей с префиксом `jtl_`.
+> Структура YAML-шаблона соответствуют структуре поля `issues` JSON-объекта,
+  отправляемого теле метода `POST /rest/api/2/issue` в Jira REST API за
+  исключением служебных полей с префиксом `jtl_`. Cм. документацию к Jira
+  REST API https://docs.atlassian.com/software/jira/docs/api/REST/
 
 > Доступно автодополнение поля `-a / --assignee`.
   См. [Включение автодополнения в bash](#включение-автодополнения-в-bash)
@@ -219,20 +252,31 @@
 Путь к файлу шаблона может быть указан в конфигурационном файле
 
     $ cat ~/.jtl.cfg
-    [jtl.create-issue]
-    issue_template = issue.yaml
+    [jtl.defaults.create-issue]
+    template = issue.yaml
     
     $ jtl create-issue -s "Добавить функцию создания задачи"
-    Created issue: http://localhost:8080/browse/DEV-11
+    Created issue: http://localhost:8080/browse/DEV-123
 
-TODO: Добавить пример с многострочным description
+#### Опции
 
-#### Вывод информации о созданной задаче
+|CLI               |Config                                |Template        |Required|Описание           |
+|------------------|--------------------------------------|----------------|--------|-------------------|
+|`-jt / --template`|`[jtl.defaults.create-issue] template`|                | -      |Шаблон полей задачи|
+|`-p / --project`  |`[jtl.defaults] project`              |`project.key`   | +      |ID проекта         |
+|`-t / --type`     | -                                    |`issuetype.name`| +      |Тип задачи         |
+|`-a / --assignee` | -                                    |`assignee.name` | -      |Исполнитель задачи |
+|`-s / --summary`  | -                                    |`summary`       | +      |Поле задачи "Тема" |
 
 
-Выводится YAML-файл в формате, полностью cоответствующем формату JSON-объекта, 
-возвращаемого методом получения данных задачи
-`GET /rest/api/2/issue/{issueIdOrKey}` в Jira REST API.
+### get-issue
+
+Вывод информации о созданной задаче
+
+Выводится YAML-файл в формате, который полностью соответствует формату
+JSON-объекта,возвращаемого методом получения данных задачи
+`GET /rest/api/2/issue/{issueIdOrKey}` в Jira REST API. Cм. документацию к
+Jira REST API https://docs.atlassian.com/software/jira/docs/api/REST/
 
     $ jtl get-issue DEV-11
     ...
@@ -244,7 +288,9 @@ TODO: Добавить пример с многострочным description
       name: Story
     ...
 
-#### Пакетное создание задач
+### create-issue-set
+
+Пакетное создание задач
 
     $ cat issues.yaml
     jtl_template:
@@ -278,19 +324,8 @@ TODO: Добавить пример с многострочным description
         Created sub-issue: http://localhost:8080/browse/DEV-14
         Created sub-issue: http://localhost:8080/browse/DEV-15
 
-> Структура объектов в YAML полностью соответствуют структуре объектов JSON в
-  REST API Jira, за исключением служебных полей с префиксом `jtl_`.
-
-* `jtl_template` - шаблон для всех задач, указанных в YAML-файле. Задачи
-  наследуют и переопределяют поля, указанные в шаблоне.
-* `jtl_issues` - набор задач для создания в Jira.
-* `jtl_sub_issues` - набор подзадачи основной задачи, указанной на верхнем
-  уровне. Подзадачи наследуют и переопределяют поля, указанные в основной
-  задаче
-
 ## Описание полей задачи
 
-* `fields.assignee`: см. команду [Поиск пользователей](#Поиск-пользователей).
 * Поле спринта. Имеет формат `customfield_10101`, но цифры на разных Jira-серверах
   отличаются. В ответе сервера содержимое поля приходит примерно таким:
   `"com.atlassian.greenhopper.service.sprint.Sprint@6cd8e5ef[id=55,rapidViewId=40,state=ACTIVE,name=...`,
