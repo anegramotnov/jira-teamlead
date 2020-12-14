@@ -30,13 +30,28 @@
 
 ## Установка
 
-* Установите пакет
+### С использованием pip
 
-      $ pip install jira_teamlead
+    $ pip install jira_teamlead
+      
+### Из исходного кода
 
-* Теперь можно запускать jtl из командной строки
+    $ git clone https://github.com/anegramotnov/jira-teamlead.git
+    $ cd jira-teamlead
+    $ poetry build
+    $ pip install dist/jira-teamlead-0.1.0.tar.gz # or other version
+    $ jtl --help  # usage
 
-      $ jtl --help
+### Для разработки
+
+    $ git clone https://github.com/anegramotnov/jira-teamlead.git
+    $ cd jira-teamlead
+    $ poetry install  # with development dependencies!
+    $ # run using poetry:
+    $ poetry run jtl --help
+    $ # or run directly in venv
+    $ poetry shell
+    $ jtl --help
 
 * [Опционально] Для включения автодополнения, добавьте в `~/.bashrc`
   следующую строку:
@@ -52,86 +67,106 @@
 
 ## Конфигурация
 
-### Общие конфгигурационные параметры
-
-Все команды принимают общие конфигурационные параметры, некоторые из которых
-могут быть переопределены в конфигурационном файле
-(см. [Конфигурационные файлы](#Конфигурационные-файлы))
-
-|CLI               |Config    |Required|Описание             |
-|------------------|----------|--------|---------------------|
-|`-jc / --config`  | -        | -      |Конфигурационный файл|
-|`-js / --server`  |`server`  | +      |Сервера Jira         |
-|`-jl / --login`   |`login`   | +      |Логин в Jira         |
-|`-ja / --password`|`password`| +      |Пароль в Jira        |
+Конфигурация приложения может быть задана через конфигурационные файлы и
+через параметры командной строки
 
 ### Порядок поиска параметров конфигурации
 
 Указаны в порядке от высшего приоритета к низшему:
 
 * Параметры командной строки
-* Файл, указанный в параметре `-cfg/--config`
-* Файл `.jtl.cfg`, находящийся в текущей директории
-* Файл `~/.jtl.cfg`, находящийся в домашней директории пользователя
+* Текущий конфигурационный файл
+    * Файл, указанный в параметре `-cfg/--config`
+    * Файл `.jtl.cfg`, находящийся в текущей директории
+    * Файл `~/.jtl.cfg`, находящийся в домашней директории пользователя
 
-> При отсутствии обязательного параметра в параметрах командной строки и
-  в конфигурационных файлах, он будет предложен для ввода после запуска
-  команды (prompt)
+> При отсутствии обязательного параметра в опциях командной строки и
+  в конфигурационных файлах, он будет предложен для ввода (prompt-ввод) после
+  запуска команды
 
 ### Формат конфигурационного файла
 
     [jtl.jira]
     server = http://localhost:8080
-    auth = login:password
+    login = my_login
+    password = my_password
     
-    [jtl.create-issue]
+    [jtl.defaults]
+    project = DEV
+    
+    [jtl.defaults.create-issue]
     template = default_issue.yaml
-    
-    [jtl.other-command]
+
+### Секции конфигурационного файла
+
+#### `[jtl.jira]`
+
+Секция подключения к серверу Jira:
+
+|Config    |CLI               |Required|Описание      |
+|----------|------------------|--------|--------------|
+|`server`  |`-js / --server`  | +      |Сервера Jira  |
+|`login`   |`-jl / --login`   | +      |Логин в Jira  |
+|`password`|`-jp / --password`| +      |Пароль в Jira |
+
+> __Поле `password` хранится в открытом виде!__ Во избежание риска
+  компрометации, можно использовать prompt-ввод.
+
+#### `[jtl.defaults]`
+
+Секция общих параметров по умолчанию
+
+|Config    |CLI               |Required|Описание                 |
+|----------|------------------|--------|-------------------------|
+|`project` |`-p / --project`  | -      |Ключ проекта по умолчанию|
+
+
+#### `[jtl.defaults.create-issue]`
+
+Секция параметров по умолчанию команды создания задачи
+
+|Config    |CLI               |Required|Описание           |
+|----------|------------------|--------|-------------------|
+|`template`|`-tl / --template`| -      |Шаблон полей задачи|
+
+
+### Примеры вариантов конфигурации
+
+Без опций командной строки:
+
+    $ jtl search-users
+    Server: <prompt_typing>
+    Login: <prompt_typing>
+    Password: <hidden_prompt_typing>
+    Project: <prompt_typing>
     ...
 
-Конфигурационный файл делится на секции:
+С опциями командной строки:
 
-
-
-#### Примеры:
-
-Использование конфигурационного файла:
-
-    $ cat my_config.cfg
-    [jtl]
-    server = http://localhost:8080
-    auth = login:password
-    $ jtl get-issue --config my_config.cfg DEV-11
-
-Использование параметров командной строки:
-
-    $ jtl get-issue --jira-server http://localhost:8080 --jira-auth login:password DEV-11
-
-
-#### Формат конфигурационного файла
-
+    $ jtl search-users --server http://localhost:8080 --login my_login \
+    --password my_password --project DEV
+    ...
+    
+С сокращенными опциями:
+    
+    $ jtl search-users -js http://localhost:8080 -jl my_login -jp my_password -p DEV
+    ...
+    
+С конфигурационным файлом
+    
+    cat ~/.cfg
     [jtl.jira]
     server = http://localhost:8080
-    auth = login:password
+    login = my_login
+    password = my_password
     
-    [jtl.create-issue]
-    template = default_issue.yaml
-    
-    [jtl.other-command]
+    $ jtl search-users -p DEV
     ...
+    
+    
+    
 
-Конфигурационный файл делится на секции:
 
-##### `[jtl.jira]` 
-
-Секция общих конфигурации сервера Jira. См. раздел
-[Общие конфгигурационные параметры](#Общие-конфгигурационные-параметры)
-
-##### `[jtl.<command-name>]`
-
-Секции параметров команды `<command-name>`. См. документацию к
-`<command-name>`
 
 ## Команды
 
@@ -341,6 +376,7 @@ TODO: Добавить пример с многострочным description
             - [ ] Кеширование
     - [ ] Опция `--dry-run`
 - [ ] Идеи
+    - [ ] Перенести общие опции CLI к основной команде?
     - [ ] Опция открытия созданных задач в браузере (с настройкой)
     - [ ] Убрать логику подстановки префикса `jtl.` в секции конфигов
     - [ ] Убрать сокращенный вариант опций конфигурационных параметров
