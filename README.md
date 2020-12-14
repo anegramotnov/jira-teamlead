@@ -459,6 +459,9 @@ Jira REST API https://docs.atlassian.com/software/jira/docs/api/REST/
     - [ ] Опция `--filter` для `get-issue` для поиска по имени ветки, т.к.
       grep в mintty не работает с юникодом. 
 - [ ] Технический долг
+    - [ ] Устранить шаблонизацию обязательных полей, если они и так были
+          проставлены через fallback или сделать поля необязательными, чтобы
+          они один раз проставлялись через шаблонизацию.
     - [ ] Сделать простую обработку ошибок, как в another-jira-cli
     - [ ] Вынести все параметры опций в dict
     - [ ] Отрефакторить пакет cli - пенести комманды в соответствующие пакеты
@@ -477,5 +480,5 @@ Jira REST API https://docs.atlassian.com/software/jira/docs/api/REST/
     - [ ] Магия `@add_jira_options` и `@add_config_option`/`@remove_config_option`
       не применяется для `ctx.params` в аргументах функции обратного вызова
       `autocompletion=`. Понять, почему и придумать, как исправить.
-    - [x] Разделить `jira-auth` на `jira-login` и `jira-password`
-    - [ ] Сделать `jira-password` вводимым из prompt
+    - [x] Разделить `jira-auth` на `login` и `password`
+    - [x] Сделать `password` вводимым из prompt

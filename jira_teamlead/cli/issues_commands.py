@@ -81,10 +81,8 @@ def assignee_autocompletion(
 @click.option(
     "-a",
     "--assignee",
-    cls=FallbackOption,
     required=False,
     type=str,
-    fallback=from_template_fallback("assignee.name"),
     help="Исполнитель",
     autocompletion=assignee_autocompletion,
 )
@@ -103,7 +101,6 @@ def assignee_autocompletion(
     required=True,
     is_flag=True,
     default=True,
-    prompt=True,
     fallback=from_config_fallback(section="defaults.create-issue", option="open_link"),
     help="Открыть созданные задачи в браузере",
 )
