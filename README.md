@@ -184,13 +184,13 @@
 |`-jp / --password`|`[jtl.jira] password`| +      |Пароль в Jira        |
 
 
-### get-assignee
+### search-users
 
 Вывод списка пользователей, доступных для поля `assignee`
 
 Поиск конкретного пользователя в проекте DEV:
 
-    $ jtl get-assignee -p DEV alek
+    $ jtl search-users -p DEV alek
     aleksey.alekseev (Aleksey Alekseev, aleks@localhost)
     #
     # assignee.name   a.displayName     a.emailAddress
