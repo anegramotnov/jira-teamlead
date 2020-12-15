@@ -1,12 +1,12 @@
 import click
 
-from jira_teamlead.cli.config_options import (
+from jira_teamlead.cli.options.config import (
     add_config_option,
     from_config_fallback,
     skip_config_option,
 )
-from jira_teamlead.cli.fallback_options import FallbackOption
-from jira_teamlead.cli.jira_options import add_jira_options
+from jira_teamlead.cli.options.fallback import FallbackOption
+from jira_teamlead.cli.options.jira import add_jira_options
 from jira_teamlead.jira_wrapper import JiraWrapper
 
 

@@ -1,17 +1,27 @@
 from functools import update_wrapper
 from typing import Any, Callable
+from urllib.parse import urlparse
 
 import click
 
-from jira_teamlead.cli.config_options import from_config_fallback
-from jira_teamlead.cli.fallback_options import FallbackOption
-from jira_teamlead.cli.validators import parse_server_option
+from jira_teamlead.cli.options.config import from_config_fallback
+from jira_teamlead.cli.options.fallback import FallbackOption
 from jira_teamlead.jira_wrapper import JiraWrapper
 
 SERVER_CLICK_PARAM = "server"
 LOGIN_CLICK_PARAM = "login"
 PASSWORD_CLICK_PARAM = "password"
 JIRA_CLICK_PARAM = "jira"
+
+
+def parse_server_option(ctx: click.Context, param: click.Parameter, value: str) -> str:
+    """Валидация и преобразование параметра --jira-host."""
+    url = urlparse(value)
+
+    if not all([url.scheme, url.netloc]):
+        raise click.BadParameter("ожидается формат 'http[s]://jira.host.net'")
+
+    return f"{url.scheme}://{url.netloc}"
 
 
 jira_options = (

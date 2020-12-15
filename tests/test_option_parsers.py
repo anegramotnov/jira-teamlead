@@ -1,7 +1,7 @@
 import click
 import pytest
 
-from jira_teamlead.cli.validators import parse_server_option
+from jira_teamlead.cli.options.jira import parse_server_option
 
 
 @pytest.mark.parametrize("value", ("", "lol", "lol.wut.lol", "http:lol.wut"))

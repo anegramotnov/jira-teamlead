@@ -4,7 +4,7 @@ from typing import Any, Callable, Optional
 import click
 import yaml
 
-from jira_teamlead.cli.fallback_options import FallbackOption
+from jira_teamlead.cli.options.fallback import FallbackOption
 
 TEMPLATE_CLICK_PARAM = "template"
 

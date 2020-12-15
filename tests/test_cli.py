@@ -3,8 +3,9 @@ from unittest import mock
 import pytest
 from click.testing import CliRunner
 
-from jira_teamlead.cli.issues_commands import create_issue, create_issue_set
-from jira_teamlead.cli.users_commands import search_users
+from jira_teamlead.cli.commands.create_issue import create_issue
+from jira_teamlead.cli.commands.create_issue_set import create_issue_set
+from jira_teamlead.cli.commands.search_users import search_users
 
 
 @pytest.fixture()
@@ -13,7 +14,7 @@ def runner() -> CliRunner:
     return runner
 
 
-@mock.patch("jira_teamlead.cli.jira_options.JiraWrapper")
+@mock.patch("jira_teamlead.cli.options.jira.JiraWrapper")
 def test_search_users(JIRA_MOCK, runner):
 
     user_1 = mock.MagicMock()
@@ -34,7 +35,7 @@ def test_search_users(JIRA_MOCK, runner):
     jira_mock.search_users.assert_called_once_with(search_string=None, project="LOL")
 
 
-@mock.patch("jira_teamlead.cli.jira_options.JiraWrapper")
+@mock.patch("jira_teamlead.cli.options.jira.JiraWrapper")
 def test_create_issue(JIRA_MOCK, runner):
     jira_mock = JIRA_MOCK.return_value
 
@@ -75,7 +76,7 @@ def test_create_issue(JIRA_MOCK, runner):
     )
 
 
-@mock.patch("jira_teamlead.cli.jira_options.JiraWrapper")
+@mock.patch("jira_teamlead.cli.options.jira.JiraWrapper")
 def test_create_issue_set(JIRA_MOCK, runner):
     jira_mock = JIRA_MOCK.return_value
     jira_mock.server = "http://lol.wut"

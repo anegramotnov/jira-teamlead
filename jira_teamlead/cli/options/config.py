@@ -3,7 +3,7 @@ from typing import Any, Callable, Optional
 
 import click
 
-from jira_teamlead.cli.fallback_options import FallbackOption
+from jira_teamlead.cli.options.fallback import FallbackOption
 from jira_teamlead.config import Config
 
 CONFIG_CLICK_PARAM = "config"

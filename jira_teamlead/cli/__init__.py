@@ -1,7 +1,9 @@
 import click
 
-from .issues_commands import create_issue, create_issue_set, get_issue
-from .users_commands import search_users
+from jira_teamlead.cli.commands.create_issue import create_issue
+from jira_teamlead.cli.commands.create_issue_set import create_issue_set
+from jira_teamlead.cli.commands.get_issue import get_issue
+from jira_teamlead.cli.commands.search_users import search_users
 
 
 @click.group()
