@@ -7,6 +7,7 @@ from jira_teamlead.jira_wrapper import JiraWrapper, SubIssue, SuperIssue
 def test_search_users(JIRA_MOCK):
 
     user_1 = mock.MagicMock()
+    user_1.raw = {"raw_field": "raw_value"}
     user_1.name = "test"
     user_1.displayName = "Test test"
     user_1.emailAddress = "email at lol dot wut"
@@ -30,7 +31,7 @@ def test_search_users(JIRA_MOCK):
 
     assert len(result) == 1
 
-    assert result[0].lib_user == user_1
+    assert result[0].raw == user_1.raw
 
     jira_mock.search_assignable_users_for_issues.assert_called_once_with(
         username=None, project="LOL"

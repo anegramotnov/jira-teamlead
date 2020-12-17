@@ -1,44 +1,103 @@
-from dataclasses import dataclass, field
-from typing import List, Optional, Tuple, Type, TypeVar
+import dataclasses
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar
 
-from jira import JIRA, Issue, User
+import jira.resources
+from jira.client import JIRA
 
 from jira_teamlead import jtl_fields
 
-IssueType = TypeVar("IssueType", bound="IssueWrapper")
+T_Issue = TypeVar("T_Issue", bound="Issue")
 
 
-@dataclass
-class IssueWrapper:
-    lib_issue: Issue
+@dataclasses.dataclass
+class Issue:
+    raw: Dict[str, Any]
     key: str
     summary: str
     link: str
 
     @classmethod
-    def from_lib(cls: Type[IssueType], issue: Issue, server: str) -> IssueType:
-        link = "{0}/browse/{1}".format(server, issue.key)
+    def from_resource(
+        cls: Type[T_Issue], issue_resource: jira.resources.Issue, server: str
+    ) -> T_Issue:
+        link = "{0}/browse/{1}".format(server, issue_resource.key)
         return cls(
-            lib_issue=issue, key=issue.key, summary=issue.fields.summary, link=link
+            raw=issue_resource.raw,
+            key=issue_resource.key,
+            summary=issue_resource.fields.summary,
+            link=link,
         )
 
+    @classmethod
+    def from_issue(cls: Type[T_Issue], issue: "Issue") -> T_Issue:
+        issue_params = {}
+        for issue_field in dataclasses.fields(Issue):
+            issue_params[issue_field.name] = getattr(issue, issue_field.name)
+        return cls(**issue_params)
 
-@dataclass
-class SubIssue(IssueWrapper):
+
+@dataclasses.dataclass
+class SubIssue(Issue):
     pass
 
 
-@dataclass
-class SuperIssue(IssueWrapper):
-    sub_issues: List[SubIssue] = field(default_factory=list)
+@dataclasses.dataclass
+class SuperIssue(Issue):
+    sub_issues: List[SubIssue] = dataclasses.field(default_factory=list)
 
 
-@dataclass
-class UserWrapper:
-    lib_user: User
+@dataclasses.dataclass
+class User:
+    raw: Dict[str, Any]
     name: str
     displayName: str
     emailAddress: str
+
+    @classmethod
+    def from_resource(cls, user_resource: jira.resources.User) -> "User":
+        return cls(
+            raw=user_resource.raw,
+            name=user_resource.name,
+            displayName=user_resource.displayName,
+            emailAddress=user_resource.emailAddress,
+        )
+
+
+@dataclasses.dataclass
+class IssueType:
+    raw: Dict[str, Any]
+    id: str
+    name: str
+
+    @classmethod
+    def from_resource(
+        cls, issue_type_resource: jira.resources.IssueType
+    ) -> "IssueType":
+        return cls(
+            raw=issue_type_resource.raw,
+            id=issue_type_resource.id,
+            name=issue_type_resource.name,
+        )
+
+
+@dataclasses.dataclass
+class Project:
+    raw: Dict[str, Any]
+    id: str
+    key: str
+    name: str
+
+    @classmethod
+    def from_resource(
+        cls,
+        project_resource: jira.resources.Project,
+    ) -> "Project":
+        return cls(
+            raw=project_resource.raw,
+            id=project_resource.id,
+            key=project_resource.key,
+            name=project_resource.name,
+        )
 
 
 class JiraWrapper:
@@ -55,17 +114,15 @@ class JiraWrapper:
         self.server = server
         self.jira = JIRA(server=self.server, auth=auth)
 
-    def create_issue(
-        self, fields: dict, template: Optional[dict] = None
-    ) -> IssueWrapper:
+    def create_issue(self, fields: dict, template: Optional[dict] = None) -> Issue:
         """Создать Issue."""
         issue_fields = self._override_from_template(
             original_fields=fields, template_fields=template
         )
 
-        created_lib_issue = self.jira.create_issue(**issue_fields)
+        issue_resource = self.jira.create_issue(**issue_fields)
 
-        issue = IssueWrapper.from_lib(issue=created_lib_issue, server=self.server)
+        issue = Issue.from_resource(issue_resource=issue_resource, server=self.server)
 
         return issue
 
@@ -73,8 +130,8 @@ class JiraWrapper:
         self,
         issues: List[dict],
         template: Optional[dict] = None,
-    ) -> List[IssueWrapper]:
-        templated_issues: List[IssueWrapper] = []
+    ) -> List[Issue]:
+        templated_issues: List[Issue] = []
 
         for original_issue_fields in issues:
 
@@ -99,7 +156,9 @@ class JiraWrapper:
         """Создать задачу, содержащее подзадачи."""
         created_issue = self.create_issue(fields=fields)
 
-        issue = SuperIssue.from_lib(issue=created_issue.lib_issue, server=self.server)
+        issue = SuperIssue.from_issue(issue=created_issue)
+
+        super_issue = SuperIssue.from_issue(issue=created_issue)
 
         for sub_issue_extra_fields in sub_issues:
             sub_issue = self.create_sub_issue(
@@ -107,9 +166,9 @@ class JiraWrapper:
                 super_issue_key=issue.key,
                 super_issue_fields=fields,
             )
-            issue.sub_issues.append(sub_issue)
+            super_issue.sub_issues.append(sub_issue)
 
-        return issue
+        return super_issue
 
     def _override_from_template(
         self, original_fields: dict, template_fields: Optional[dict] = None
@@ -134,10 +193,10 @@ class JiraWrapper:
     def _override_from_super_issue(
         self, sub_issue_fields: dict, super_issue_fields: dict
     ) -> dict:
-        fields = {}
-        fields.update(super_issue_fields)
-        fields.update(sub_issue_fields)
-        return fields
+        new_fields = {}
+        new_fields.update(super_issue_fields)
+        new_fields.update(sub_issue_fields)
+        return new_fields
 
     def create_sub_issue(
         self, fields: dict, super_issue_key: str, super_issue_fields: dict
@@ -153,34 +212,43 @@ class JiraWrapper:
 
         created_issue = self.create_issue(fields=sub_issue_fields)
 
-        sub_issue = SubIssue.from_lib(issue=created_issue.lib_issue, server=self.server)
+        sub_issue = SubIssue.from_issue(issue=created_issue)
 
         return sub_issue
 
     def search_users(
         self, project: str, search_string: Optional[str] = None
-    ) -> List[UserWrapper]:
+    ) -> List[User]:
         """Вывести логины пользователей, доступные для поля assignee."""
-        lib_users = self.jira.search_assignable_users_for_issues(
+        user_resources = self.jira.search_assignable_users_for_issues(
             username=search_string, project=project
         )
         users = []
-        for lib_user in lib_users:
-            if not lib_user.deleted and lib_user.active:
-                users.append(
-                    UserWrapper(
-                        lib_user=lib_user,
-                        name=lib_user.name,
-                        displayName=lib_user.displayName,
-                        emailAddress=lib_user.emailAddress,
-                    )
-                )
+        for user_resource in user_resources:
+            if not user_resource.deleted and user_resource.active:
+                users.append(User.from_resource(user_resource))
 
         return users
 
-    def get_issue(self, issue_id: str) -> IssueWrapper:
-        lib_issue = self.jira.issue(id=issue_id)
+    def get_issue(self, issue_id: str) -> Issue:
+        issue_resource = self.jira.issue(id=issue_id)
 
-        issue = IssueWrapper.from_lib(issue=lib_issue, server=self.server)
+        issue = Issue.from_resource(issue_resource=issue_resource, server=self.server)
 
         return issue
+
+    def get_issue_types(self) -> List[IssueType]:
+        issue_type_resources = self.jira.issue_types()
+
+        issue_types = [
+            IssueType.from_resource(resource) for resource in issue_type_resources
+        ]
+
+        return issue_types
+
+    def get_projects(self) -> List[Project]:
+        project_resources = self.jira.projects()
+
+        projects = [Project.from_resource(resource) for resource in project_resources]
+
+        return projects

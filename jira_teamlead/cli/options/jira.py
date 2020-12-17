@@ -60,11 +60,13 @@ jira_options = (
 )
 
 
-def set_jira_to_params(params: dict) -> None:
+def set_jira_to_params(params: dict) -> JiraWrapper:
     server = params.pop(SERVER_CLICK_PARAM)
     login = params.pop(LOGIN_CLICK_PARAM)
     password = params.pop(PASSWORD_CLICK_PARAM)
-    params[JIRA_CLICK_PARAM] = JiraWrapper(server=server, auth=(login, password))
+    jira = JiraWrapper(server=server, auth=(login, password))
+    params[JIRA_CLICK_PARAM] = jira
+    return jira
 
 
 def add_jira_options(name: str) -> Callable:

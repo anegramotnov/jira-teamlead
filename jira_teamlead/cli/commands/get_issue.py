@@ -18,7 +18,7 @@ def get_issue(
     """Получить все доступные поля Issue по ISSUE_ID."""
     issue = jira.get_issue(issue_id=issue_id)
 
-    fields = issue.lib_issue.raw["fields"]
+    fields = issue.raw["fields"]
 
     yaml_string = yaml.dump(fields, allow_unicode=True)
 

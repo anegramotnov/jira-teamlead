@@ -1,39 +1,28 @@
 import webbrowser
-from typing import List, Optional
+from typing import Optional
 
 import click
 
+from jira_teamlead.cli.autocompletion import (
+    assignee_autocompletion,
+    autocompletion_with_jira,
+    issue_type_autocompletion,
+    project_autocompletion,
+)
 from jira_teamlead.cli.options.config import (
     add_config_option,
     from_config_fallback,
     skip_config_option,
 )
 from jira_teamlead.cli.options.fallback import FallbackOption
-from jira_teamlead.cli.options.jira import (
-    JIRA_CLICK_PARAM,
-    add_jira_options,
-    set_jira_to_params,
-)
+from jira_teamlead.cli.options.issue import PROJECT_CLICK_PARAM
+from jira_teamlead.cli.options.jira import add_jira_options
 from jira_teamlead.cli.options.template import (
     TEMPLATE_CLICK_PARAM,
     from_template_fallback,
     parse_yaml_option,
 )
 from jira_teamlead.jira_wrapper import JiraWrapper
-
-PROJECT_CLICK_PARAM = "project"
-
-
-def assignee_autocompletion(
-    ctx: click.Context, args: List[str], incomplete: str
-) -> List[str]:
-    set_jira_to_params(ctx.params)
-
-    jira: JiraWrapper = ctx.params[JIRA_CLICK_PARAM]
-    project: str = ctx.params[PROJECT_CLICK_PARAM]
-    users = jira.search_users(project=project, search_string=incomplete)
-    usernames = [u.name for u in users]
-    return usernames
 
 
 @click.command()
@@ -44,25 +33,26 @@ def assignee_autocompletion(
     "--template",
     TEMPLATE_CLICK_PARAM,
     cls=FallbackOption,
-    required=False,
     type=click.File("r", encoding="utf-8"),
-    fallback=from_config_fallback(section="defaults.create-issue", option="template"),
+    required=False,
     callback=parse_yaml_option,
     help="Файл с шаблоном Issue",
+    fallback=from_config_fallback(section="defaults.create-issue", option="template"),
 )
 @click.option(
     "-p",
     "--project",
     PROJECT_CLICK_PARAM,
     cls=FallbackOption,
+    type=str,
+    required=True,
+    autocompletion=autocompletion_with_jira(project_autocompletion),
+    prompt=True,
+    help="Ключ проекта",
     fallback=[
         from_template_fallback(query="project.key"),
         from_config_fallback(section="defaults", option="project"),
     ],
-    required=True,
-    prompt=True,
-    type=str,
-    help="Ключ проекта",
 )
 @skip_config_option
 @click.option(
@@ -70,26 +60,27 @@ def assignee_autocompletion(
     "--type",
     "issue_type",
     cls=FallbackOption,
-    required=True,
-    prompt=True,
     type=str,
-    fallback=from_template_fallback("issuetype.name"),
+    required=True,
+    autocompletion=autocompletion_with_jira(issue_type_autocompletion),
+    prompt=True,
     help="Тип Issue",
+    fallback=from_template_fallback("issuetype.name"),
 )
 @click.option(
     "-a",
     "--assignee",
-    required=False,
     type=str,
+    required=False,
+    autocompletion=autocompletion_with_jira(assignee_autocompletion),
     help="Исполнитель",
-    autocompletion=assignee_autocompletion,
 )
 @click.option(
     "-s",
     "--summary",
+    type=str,
     required=True,
     prompt=True,
-    type=str,
     help="Название задачи",
 )
 @click.option(
@@ -97,10 +88,10 @@ def assignee_autocompletion(
     "open_link",
     cls=FallbackOption,
     required=True,
-    is_flag=True,
     default=True,
-    fallback=from_config_fallback(section="defaults.create-issue", option="open_link"),
+    is_flag=True,
     help="Открыть созданные задачи в браузере",
+    fallback=from_config_fallback(section="defaults.create-issue", option="open_link"),
 )
 def create_issue(
     jira: JiraWrapper,
