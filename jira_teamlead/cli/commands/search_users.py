@@ -1,5 +1,9 @@
 import click
 
+from jira_teamlead.cli.autocompletion import (
+    autocompletion_with_jira,
+    project_autocompletion,
+)
 from jira_teamlead.cli.options.config import (
     add_config_option,
     from_config_fallback,
@@ -18,11 +22,12 @@ from jira_teamlead.jira_wrapper import JiraWrapper
     "-p",
     "--project",
     cls=FallbackOption,
-    required=True,
     type=str,
-    fallback=from_config_fallback(section="defaults", option="project"),
+    required=True,
+    autocompletion=autocompletion_with_jira(project_autocompletion),
     prompt=True,
     help="Ключ проекта",
+    fallback=from_config_fallback(section="defaults", option="project"),
 )
 @click.argument("search_string", type=str, required=False)
 def search_users(
