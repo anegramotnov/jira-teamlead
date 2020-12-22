@@ -2,7 +2,7 @@ from typing import Callable, List, Optional
 
 import click
 
-from jira_teamlead.cli.options.issue import PROJECT_CLICK_PARAM
+from jira_teamlead.cli.options.constants import PROJECT_PARAM
 from jira_teamlead.cli.options.jira import set_jira_to_params
 from jira_teamlead.jira_wrapper import IssueType, JiraWrapper, Project
 
@@ -54,7 +54,7 @@ def search_projects(jira: JiraWrapper, search_string: Optional[str]) -> List[Pro
 def assignee_autocompletion(
     jira: JiraWrapper, params: dict, incomplete: str
 ) -> List[str]:
-    project: str = params[PROJECT_CLICK_PARAM]
+    project: str = params[PROJECT_PARAM]
     users = jira.search_users(project=project, search_string=incomplete)
     usernames = [u.name for u in users]
     return usernames

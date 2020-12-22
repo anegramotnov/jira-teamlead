@@ -4,6 +4,7 @@ from jira_teamlead.cli.autocompletion import (
     autocompletion_with_jira,
     project_autocompletion,
 )
+from jira_teamlead.cli.options import constants
 from jira_teamlead.cli.options.config import (
     add_config_option,
     from_config_fallback,
@@ -16,18 +17,19 @@ from jira_teamlead.jira_wrapper import JiraWrapper
 
 @click.command()
 @add_config_option
-@add_jira_options("jira")
+@add_jira_options(constants.JIRA_PARAM)
 @skip_config_option
 @click.option(
-    "-p",
-    "--project",
+    constants.PROJECT_SHORT,
+    constants.PROJECT_FULL,
+    constants.PROJECT_PARAM,
     cls=FallbackOption,
     type=str,
     required=True,
     autocompletion=autocompletion_with_jira(project_autocompletion),
     prompt=True,
-    help="Ключ проекта",
-    fallback=from_config_fallback(section="defaults", option="project"),
+    help=constants.PROJECT_HELP,
+    fallback=from_config_fallback(*constants.PROJECT_CONFIG),
 )
 @click.argument("search_string", type=str, required=False)
 def search_users(

@@ -1,1 +1,0 @@
-PROJECT_CLICK_PARAM = "project"

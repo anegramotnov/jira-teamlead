@@ -144,10 +144,10 @@
 Без опций командной строки:
 
     $ jtl search-users
-    Server: <prompt_typing>
-    Login: <prompt_typing>
-    Password: <hidden_prompt_typing>
-    Project: <prompt_typing>
+    Server: <user input><enter>
+    Login: <user input><enter>
+    Password: <user input><enter>
+    Project: <user input><enter>
     ...
 
 С опциями командной строки:
@@ -183,6 +183,30 @@
 |`-jl / --login`   |`[jtl.jira] login`   | +      |Логин в Jira         |
 |`-jp / --password`|`[jtl.jira] password`| +      |Пароль в Jira        |
 
+
+### config
+
+Команда конфигурирования приложения
+
+#### Опции
+
+|CLI               |Config                                           |Prompt|Описание                                     |
+|------------------|-------------------------------------------------|------|---------------------------------------------|
+|`--local/--global`| -                                               | -    |Локальный (`./`) или глобальный (`~/`)конфиг |
+|`-js / --server`  |`[jtl.jira] server`                              | +    |Сервера Jira                                 |
+|`-jl / --login`   |`[jtl.jira] login`                               | +    |Логин в Jira                                 |                  
+|`-jp / --password`|`[jtl.jira] password`                            | +    |Пароль в Jira                                |
+|`--open/--no-open`|`[jtl.jtl.defaults.create-issue] open_in_browser`| -    |Открыть в браузере после создания            |
+|`-jt / --template`|`[jtl.defaults.create-issue] template`           | -    |Шаблон полей задачи                          |
+
+#### config init
+
+Задание конфигурации приложения. Пропущенные обязательные параметры будут
+предложены для ввода после запуска команды.
+
+#### config set
+
+Изменение параметра конфигурации
 
 ### search-users
 
@@ -269,7 +293,7 @@
 |`-t / --type`     | -                                          |`issuetype.name`| +      |Тип задачи                        |
 |`-a / --assignee` | -                                          |`assignee.name` | -      |Исполнитель задачи                |
 |`-s / --summary`  | -                                          |`summary`       | +      |Поле задачи "Тема"                |
-|`--open/--no-open`| `[jtl.jtl.defaults.create-issue] open_link`| -              |        |Открыть в браузере после создания |
+|`--open/--no-open`| `[jtl.jtl.defaults.create-issue] open_in_browser`| -              |        |Открыть в браузере после создания |
 
 ### get-issue
 
@@ -355,6 +379,7 @@ Jira REST API https://docs.atlassian.com/software/jira/docs/api/REST/
         - Параметры
             - [x] summary
             - [ ] description
+                - [ ] Многострочный
             - [x] assignee
                 - [x] автодополнение
                 - [ ] "Назначить на меня"
@@ -368,17 +393,18 @@ Jira REST API https://docs.atlassian.com/software/jira/docs/api/REST/
                 - [ ] Активный спринт
                 - [ ] Дефолтный из настроек
     - [x] Поиск пользователей (для поля assignee)
-        - Параметры
-            - [x] Проект
-                - [x] Автодополнение
-                - [x] Дефолтный из настроек
     - [x] Просмотра всех полей задачи (например, для поиска спринта вручную)
     - [ ] Команда извлечения готового шаблона из задачи
     - [ ] Поиск спринтов
     - [ ] Пакетное создание задач из данных в yaml
     - [ ] Редактирование выходного файла с последующей синхронизацией с Jira
     - [ ] Команда login
-    - [ ] Команда первоначальной конфигурации jtl init / configure / login
+    - Конфигурация `jtl config`
+        - [ ] Проверять подключение к серверу перед сохранением конфига
+        - [x] config init
+        - [x] config set
+        - [ ] config list|show
+        - [x] `--global/--local`
     - [ ] Команда настройки автодополнения
     - [ ] Команда поиска поля спринта
 - Шаблонизация задач

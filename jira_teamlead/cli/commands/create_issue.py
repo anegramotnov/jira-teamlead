@@ -9,98 +9,96 @@ from jira_teamlead.cli.autocompletion import (
     issue_type_autocompletion,
     project_autocompletion,
 )
+from jira_teamlead.cli.options import constants
 from jira_teamlead.cli.options.config import (
     add_config_option,
     from_config_fallback,
     skip_config_option,
 )
 from jira_teamlead.cli.options.fallback import FallbackOption
-from jira_teamlead.cli.options.issue import PROJECT_CLICK_PARAM
 from jira_teamlead.cli.options.jira import add_jira_options
-from jira_teamlead.cli.options.template import (
-    TEMPLATE_CLICK_PARAM,
-    from_template_fallback,
-    parse_yaml_option,
-)
+from jira_teamlead.cli.options.template import from_template_fallback, parse_yaml_option
 from jira_teamlead.jira_wrapper import JiraWrapper
 
 
 @click.command()
 @add_config_option
-@add_jira_options("jira")
+@add_jira_options(constants.JIRA_PARAM)
 @click.option(
-    "-tl",
-    "--template",
-    TEMPLATE_CLICK_PARAM,
+    constants.TEMPLATE_SHORT,
+    constants.TEMPLATE_FULL,
+    constants.TEMPLATE_PARAM,
     cls=FallbackOption,
     type=click.File("r", encoding="utf-8"),
     required=False,
     callback=parse_yaml_option,
-    help="Файл с шаблоном Issue",
-    fallback=from_config_fallback(section="defaults.create-issue", option="template"),
+    help=constants.TEMPLATE_HELP,
+    fallback=from_config_fallback(*constants.TEMPLATE_CONFIG),
 )
 @click.option(
-    "-p",
-    "--project",
-    PROJECT_CLICK_PARAM,
+    constants.PROJECT_SHORT,
+    constants.PROJECT_FULL,
+    constants.PROJECT_PARAM,
     cls=FallbackOption,
     type=str,
     required=True,
     autocompletion=autocompletion_with_jira(project_autocompletion),
     prompt=True,
-    help="Ключ проекта",
+    help=constants.PROJECT_HELP,
     fallback=[
-        from_template_fallback(query="project.key"),
-        from_config_fallback(section="defaults", option="project"),
+        from_template_fallback(constants.PROJECT_TEMPLATE_QUERY),
+        from_config_fallback(*constants.PROJECT_CONFIG),
     ],
 )
 @skip_config_option
 @click.option(
-    "-t",
-    "--type",
-    "issue_type",
+    constants.ISSUE_TYPE_SHORT,
+    constants.ISSUE_TYPE_FULL,
+    constants.ISSUE_TYPE_PARAM,
     cls=FallbackOption,
     type=str,
     required=True,
     autocompletion=autocompletion_with_jira(issue_type_autocompletion),
     prompt=True,
-    help="Тип Issue",
-    fallback=from_template_fallback("issuetype.name"),
+    help=constants.ISSUE_TYPE_HELP,
+    fallback=from_template_fallback(constants.ISSUE_TYPE_TEMPLATE_QUERY),
 )
 @click.option(
-    "-a",
-    "--assignee",
+    constants.ASSIGNEE_SHORT,
+    constants.ASSIGNEE_FULL,
+    constants.ASSIGNEE_PARAM,
     type=str,
     required=False,
     autocompletion=autocompletion_with_jira(assignee_autocompletion),
-    help="Исполнитель",
+    help=constants.ASSIGNEE_HELP,
 )
 @click.option(
-    "-s",
-    "--summary",
+    constants.SUMMARY_SHORT,
+    constants.SUMMARY_FULL,
+    constants.SUMMARY_PARAM,
     type=str,
     required=True,
     prompt=True,
-    help="Название задачи",
+    help=constants.SUMMARY_HELP,
 )
 @click.option(
-    "--open/--no-open",
-    "open_link",
+    constants.OPEN_LINK_FULL,
+    constants.OPEN_LINK_PARAM,
     cls=FallbackOption,
     required=True,
     default=True,
     is_flag=True,
-    help="Открыть созданные задачи в браузере",
-    fallback=from_config_fallback(section="defaults.create-issue", option="open_link"),
+    help=constants.OPEN_LINK_HELP,
+    fallback=from_config_fallback(*constants.OPEN_LINK_CONFIG),
 )
 def create_issue(
     jira: JiraWrapper,
-    template: Optional[dict],
+    issue_template: Optional[dict],
     project: str,
     issue_type: str,
     assignee: Optional[str],
     summary: str,
-    open_link: bool,
+    open_in_browser: bool,
 ) -> None:
     """Создание Issue."""
     fields = {
@@ -117,8 +115,8 @@ def create_issue(
         assignee_field = {"assignee": {"name": assignee}}
         fields.update(assignee_field)
 
-    created_issue = jira.create_issue(fields=fields, template=template)
+    created_issue = jira.create_issue(fields=fields, template=issue_template)
 
     click.echo(f"Created issue: {created_issue.link}")
-    if open_link:
+    if open_in_browser:
         webbrowser.open_new_tab(created_issue.link)

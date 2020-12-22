@@ -1,31 +1,30 @@
 from functools import update_wrapper
-from typing import Any, Callable, Optional
+from typing import Any, Callable, List, NamedTuple, Optional, Tuple, Union
 
 import click
 
+from jira_teamlead.cli.options import constants
 from jira_teamlead.cli.options.fallback import FallbackOption
-from jira_teamlead.config import Config
-
-CONFIG_CLICK_PARAM = "config"
+from jira_teamlead.config import Config, get_suitable_config
 
 
 def parse_config_option(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
 ) -> Optional[Config]:
-    config = Config(custom_path=value)
+    config = get_suitable_config(custom_path=value)
     return config
 
 
 def add_config_option(f: Callable) -> Callable:
     """Добавить опцию конфига."""
     config_option = click.option(
-        "-jc",
-        "--config",
-        CONFIG_CLICK_PARAM,
+        constants.CONFIG_SHORT,
+        constants.CONFIG_FULL,
+        constants.CONFIG_PARAM,
         type=click.Path(exists=True, dir_okay=False),
         required=False,
         callback=parse_config_option,
-        help="Путь к файлу конфигурации",
+        help=constants.CONFIG_HELP,
     )
     f = config_option(f)
     return f
@@ -39,7 +38,7 @@ def skip_config_option(f: Callable) -> Callable:
     """
 
     def wrapper(*args: Any, **kwargs: Any) -> Any:
-        kwargs.pop(CONFIG_CLICK_PARAM)
+        kwargs.pop(constants.CONFIG_PARAM)
         result = f(*args, **kwargs)
         return result
 
@@ -48,7 +47,9 @@ def skip_config_option(f: Callable) -> Callable:
 
 def from_config_fallback(section: str, option: str) -> Callable:
     def fallback(ctx: click.Context, param: FallbackOption) -> Optional[str]:
-        config: Config = ctx.params[CONFIG_CLICK_PARAM]
+        config: Optional[Config] = ctx.params[constants.CONFIG_PARAM]
+        if config is None:
+            return None
         value = config.get(section=section, option=option)
         if value is not None:
             # for override e.param_hint
@@ -58,3 +59,33 @@ def from_config_fallback(section: str, option: str) -> Callable:
         return value
 
     return fallback
+
+
+class ConfigValue(NamedTuple):
+    section: str
+    option: str
+    value: Union[str, bool]
+
+
+class ConfigOption(click.Option):
+    config_params: Tuple[str, str]
+
+    def __init__(
+        self,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        config_params = kwargs.pop("config_params")
+        self.config_params = config_params
+
+        super().__init__(*args, **kwargs)
+
+    def handle_parse_result(
+        self, ctx: click.Context, opts: Any, args: Any
+    ) -> Tuple[Any, List[str]]:
+        value, args = super().handle_parse_result(ctx, opts, args)
+        config_values = ctx.params.setdefault(constants.CONFIG_VALUES_PARAM, [])
+        if value is not None:
+            config_values.append(ConfigValue(*self.config_params, value))
+
+        return value, args

@@ -4,9 +4,8 @@ from typing import Any, Callable, Optional
 import click
 import yaml
 
+from jira_teamlead.cli.options.constants import TEMPLATE_PARAM
 from jira_teamlead.cli.options.fallback import FallbackOption
-
-TEMPLATE_CLICK_PARAM = "template"
 
 
 def parse_yaml_option(
@@ -33,7 +32,7 @@ def _get_from_template(query: str, template: dict) -> Optional[str]:
 
 def from_template_fallback(query: str) -> Callable:
     def fallback(ctx: click.Context, param: FallbackOption) -> Optional[str]:
-        template = ctx.params[TEMPLATE_CLICK_PARAM]
+        template = ctx.params[TEMPLATE_PARAM]
         if template is None:
             return None
         value = _get_from_template(query=query, template=template)

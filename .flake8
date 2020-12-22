@@ -7,4 +7,5 @@ docstring-convention=google
 ignore = W503,
          E203,
          A003,
-         D1
+         D1,
+         D415,

@@ -1,71 +1,70 @@
 from functools import update_wrapper
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 from urllib.parse import urlparse
 
 import click
 
+from jira_teamlead.cli.options import constants
 from jira_teamlead.cli.options.config import from_config_fallback
 from jira_teamlead.cli.options.fallback import FallbackOption
 from jira_teamlead.jira_wrapper import JiraWrapper
 
-SERVER_CLICK_PARAM = "server"
-LOGIN_CLICK_PARAM = "login"
-PASSWORD_CLICK_PARAM = "password"
-JIRA_CLICK_PARAM = "jira"
 
-
-def parse_server_option(ctx: click.Context, param: click.Parameter, value: str) -> str:
+def parse_server_option(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[str]:
     """Валидация и преобразование параметра --jira-host."""
-    url = urlparse(value)
+    if value is None:
+        return None
 
+    url = urlparse(value)
     if not all([url.scheme, url.netloc]):
         raise click.BadParameter("ожидается формат 'http[s]://jira.host.net'")
-
     return f"{url.scheme}://{url.netloc}"
 
 
 jira_options = (
     click.option(
-        "-js",
-        "--server",
-        SERVER_CLICK_PARAM,
+        constants.SERVER_SHORT,
+        constants.SERVER_FULL,
+        constants.SERVER_PARAM,
         cls=FallbackOption,
-        fallback=from_config_fallback(section="jira", option=SERVER_CLICK_PARAM),
+        fallback=from_config_fallback(*constants.SERVER_CONFIG),
         callback=parse_server_option,
         required=True,
         prompt=True,
-        help="Cервер Jira",
+        help=constants.SERVER_HELP,
     ),
     click.option(
-        "-jl",
-        "--login",
-        LOGIN_CLICK_PARAM,
+        constants.LOGIN_SHORT,
+        constants.LOGIN_FULL,
+        constants.LOGIN_PARAM,
         cls=FallbackOption,
-        fallback=from_config_fallback(section="jira", option=LOGIN_CLICK_PARAM),
+        fallback=from_config_fallback(*constants.LOGIN_CONFIG),
         required=True,
         prompt=True,
-        help="Логин в Jira",
+        help=constants.LOGIN_HELP,
     ),
     click.option(
-        "-jp",
-        "--password",
-        PASSWORD_CLICK_PARAM,
+        constants.PASSWORD_SHORT,
+        constants.PASSWORD_FULL,
+        constants.PASSWORD_PARAM,
         cls=FallbackOption,
-        fallback=from_config_fallback(section="jira", option=PASSWORD_CLICK_PARAM),
+        fallback=from_config_fallback(*constants.PASSWORD_CONFIG),
         required=True,
         prompt=True,
         hide_input=True,
-        help="Пароль в Jira",
+        help=constants.PASSWORD_HELP,
     ),
 )
 
 
 def set_jira_to_params(params: dict) -> JiraWrapper:
-    server = params.pop(SERVER_CLICK_PARAM)
-    login = params.pop(LOGIN_CLICK_PARAM)
-    password = params.pop(PASSWORD_CLICK_PARAM)
+    server = params.pop(constants.SERVER_PARAM)
+    login = params.pop(constants.LOGIN_PARAM)
+    password = params.pop(constants.PASSWORD_PARAM)
     jira = JiraWrapper(server=server, auth=(login, password))
-    params[JIRA_CLICK_PARAM] = jira
+    params[constants.JIRA_PARAM] = jira
     return jira
 
 
