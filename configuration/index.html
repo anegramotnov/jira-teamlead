@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Конфигурация - Jira TeamLead</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "\u041a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f";
+    var mkdocs_page_input_path = "configuration.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Jira TeamLead</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Jira TeamLead</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../installation/">Установка</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Быстрый старт</a>
+                    </li>
+                </ul>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Конфигурация</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#порядок-поиска-источников-конфигурации">Порядок поиска источников конфигурации</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#формат-конфигурационного-файла">Формат конфигурационного файла</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#секция-jtljira">Секция jtl.jira</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#секция-jtldefaults">Секция jtl.defaults</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#секция-jtldefaultscreate-issue">Секция jtl.defaults.create-issue</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../commands/">Команды</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../jira/">Сведения о Jira</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../roadmap/">Дорожная карта</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Jira TeamLead</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Конфигурация</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="конфигурация">Конфигурация<a class="headerlink" href="#конфигурация" title="Permanent link">#</a></h1>
+<p>Конфигурация приложения может быть задана через конфигурационные файлы и
+через параметры командной строки.</p>
+<h2 id="порядок-поиска-источников-конфигурации">Порядок поиска источников конфигурации<a class="headerlink" href="#порядок-поиска-источников-конфигурации" title="Permanent link">#</a></h2>
+<ul>
+<li>Файл, указанный в опции командной строки <code>-jc/--config</code></li>
+<li>Файл <code>.jtl.cfg</code>, находящийся в директории, из которой запускается jtl</li>
+<li>Файл <code>~/.jtl.cfg</code>, находящийся в домашней директории пользователя</li>
+</ul>
+<p>Это означает, что если не указан файл конфигурации в опциях командной строки,
+используется файл, находящийся в текущей директории.</p>
+<p>Если в текущей директории нет файла конфигурации, то используется файл,
+находящийся в домашней директории пользователя.</p>
+<p>Если в домашней директории пользователя файл конфигурации отсутствует,
+будут использованы параметры командной строки.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>При отсутствии обязательного параметра в опциях командной строки и
+в конфигурационных файлах, он будет предложен для ввода (prompt-ввод) после
+запуска команды</p>
+</div>
+<h2 id="формат-конфигурационного-файла">Формат конфигурационного файла<a class="headerlink" href="#формат-конфигурационного-файла" title="Permanent link">#</a></h2>
+<pre><code>[jtl.jira]
+server = http://localhost:8080
+login = my_login
+password = my_password
+
+[jtl.defaults]
+project = DEV
+
+[jtl.defaults.create-issue]
+issue_template = default_issue.yaml
+open_in_browser = true  # or false
+</code></pre>
+<h3 id="секция-jtljira">Секция <code>jtl.jira</code><a class="headerlink" href="#секция-jtljira" title="Permanent link">#</a></h3>
+<p>Секция подключения к серверу Jira:</p>
+<table>
+<thead>
+<tr>
+<th>Параметр в конфиг. файле</th>
+<th>Параметр командной строки</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>server</code></td>
+<td><code>-js/--server</code></td>
+<td>Cервер Jira</td>
+</tr>
+<tr>
+<td><code>login</code></td>
+<td><code>-jl/--login</code></td>
+<td>Логин в Jira</td>
+</tr>
+<tr>
+<td><code>password</code></td>
+<td><code>-jp/--password</code></td>
+<td>Пароль в Jira</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Предостережение</p>
+<p><strong>Поле <code>password</code> хранится в открытом виде!</strong>  Для минимизации риска
+компрометации пароля, не указывайте его в конфигурационных файлах
+или параметрах командной строки. В этом случае он будет запрошен
+после запуска команды (prompt-ввод).</p>
+</div>
+<h3 id="секция-jtldefaults">Секция <code>jtl.defaults</code><a class="headerlink" href="#секция-jtldefaults" title="Permanent link">#</a></h3>
+<p>Секция общих параметров по умолчанию</p>
+<table>
+<thead>
+<tr>
+<th>Параметр в конфиг. файле</th>
+<th>Параметр командной строки</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>project</code></td>
+<td><code>-p/--project</code></td>
+<td>Ключ проекта по умолчанию</td>
+</tr>
+</tbody>
+</table>
+<h3 id="секция-jtldefaultscreate-issue">Секция <code>jtl.defaults.create-issue</code><a class="headerlink" href="#секция-jtldefaultscreate-issue" title="Permanent link">#</a></h3>
+<p>Секция параметров по умолчанию команды создания задачи</p>
+<table>
+<thead>
+<tr>
+<th>Параметр в<br/>конфиг. файле</th>
+<th>Параметр<br/>командной строки</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>issue_template</code></td>
+<td><code>-tl/--template</code></td>
+<td>YAML-файл с шаблоном полей задачи</td>
+</tr>
+<tr>
+<td><code>open_in_browser</code></td>
+<td><code>--open/--no-open</code></td>
+<td>Открывать созданные задачи в браузере</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../commands/" class="btn btn-neutral float-right" title="Команды">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../quickstart/" class="btn btn-neutral" title="Быстрый старт"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../quickstart/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../commands/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../js/fix_table_view.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

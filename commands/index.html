@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Команды - Jira TeamLead</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "\u041a\u043e\u043c\u0430\u043d\u0434\u044b";
+    var mkdocs_page_input_path = "commands.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Jira TeamLead</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Jira TeamLead</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../installation/">Установка</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Быстрый старт</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../configuration/">Конфигурация</a>
+                    </li>
+                </ul>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Команды</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#jtl-config-init">jtl config init</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#параметры">Параметры</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#jtl-config-set">jtl config set</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#параметры_1">Параметры</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#jtl-create-issue">jtl create-issue</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#параметры_2">Параметры</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#порядок-поиска-значений-параметров">Порядок поиска значений параметров</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#примеры">Примеры</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#jtl-create-issue-set">jtl create-issue-set</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#jtl-get-issue">jtl get-issue</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#jtl-search-users">jtl search-users</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#параметры_3">Параметры</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#параметры_4">Параметры</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../jira/">Сведения о Jira</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../roadmap/">Дорожная карта</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Jira TeamLead</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Команды</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="команды">Команды<a class="headerlink" href="#команды" title="Permanent link">#</a></h1>
+<h2 id="jtl-config-init">jtl config init<a class="headerlink" href="#jtl-config-init" title="Permanent link">#</a></h2>
+<pre><code>$ jtl config init [OPTIONS]
+</code></pre>
+<p>Создать (перезаписать) конфигурационный файл.</p>
+<h3 id="параметры">Параметры<a class="headerlink" href="#параметры" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>CLI</th>
+<th>Prompt</th>
+<th>Config</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--local/--global</code></td>
+<td>-</td>
+<td><a href="../configuration/#формат-конфигурационного-файла">-</a></td>
+<td>Локальный (<code>./</code>) или глобальный (<code>~/</code>) конфиг</td>
+</tr>
+<tr>
+<td><code>-js/--server</code></td>
+<td>+</td>
+<td><a href="../configuration/#формат-конфигурационного-файла">server</a></td>
+<td>Cервер Jira</td>
+</tr>
+<tr>
+<td><code>-jl/--login</code></td>
+<td>+</td>
+<td><a href="../configuration/#формат-конфигурационного-файла">login</a></td>
+<td>Логин в Jira</td>
+</tr>
+<tr>
+<td><code>-jp/--password</code></td>
+<td>+</td>
+<td><a href="../configuration/#формат-конфигурационного-файла">password</a></td>
+<td>Пароль в Jira</td>
+</tr>
+<tr>
+<td><code>-p/--project</code></td>
+<td>+</td>
+<td><a href="../configuration/#формат-конфигурационного-файла">project</a></td>
+<td>Ключ проекта по умолчанию</td>
+</tr>
+<tr>
+<td><code>-tl/--template</code></td>
+<td>-</td>
+<td><a href="../configuration/#формат-конфигурационного-файла">issue_template</a></td>
+<td>YAML-файл с шаблоном полей задачи</td>
+</tr>
+<tr>
+<td><code>--open/--no-open</code></td>
+<td>+</td>
+<td><a href="../configuration/#формат-конфигурационного-файла">open_in_browser</a></td>
+<td>Открывать созданные задачи в браузере</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Примечание</p>
+<p>Пропущенные обязательные параметры командной строки будут предложены для
+ввода после запуска команды</p>
+</div>
+<h2 id="jtl-config-set">jtl config set<a class="headerlink" href="#jtl-config-set" title="Permanent link">#</a></h2>
+<pre><code>$ jtl config set [OPTIONS]
+</code></pre>
+<p>Изменить конфигурационный параметр(ы) в конфигурационном файле.</p>
+<h3 id="параметры_1">Параметры<a class="headerlink" href="#параметры_1" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>CLI</th>
+<th>Config</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--local/--global</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">-</a></td>
+<td>Локальный (<code>./</code>) или глобальный (<code>~/</code>) конфиг</td>
+</tr>
+<tr>
+<td><code>-js/--server</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">server</a></td>
+<td>Cервер Jira</td>
+</tr>
+<tr>
+<td><code>-jl/--login</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">login</a></td>
+<td>Логин в Jira</td>
+</tr>
+<tr>
+<td><code>-jp/--password</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">password</a></td>
+<td>Пароль в Jira</td>
+</tr>
+<tr>
+<td><code>-p/--project</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">project</a></td>
+<td>Ключ проекта по умолчанию</td>
+</tr>
+<tr>
+<td><code>-tl/--template</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">issue_template</a></td>
+<td>YAML-файл с шаблоном полей задачи</td>
+</tr>
+<tr>
+<td><code>--open/--no-open</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">open_in_browser</a></td>
+<td>Открывать созданные задачи в браузере</td>
+</tr>
+</tbody>
+</table>
+<h2 id="jtl-create-issue">jtl create-issue<a class="headerlink" href="#jtl-create-issue" title="Permanent link">#</a></h2>
+<pre><code>$ jtl create-issue [OPTIONS]
+</code></pre>
+<p>Создание задачи.</p>
+<h3 id="параметры_2">Параметры<a class="headerlink" href="#параметры_2" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Путь в<br/>шаблоне</th>
+<th>Параметр<br/>в конфиг.<br/>файле</th>
+<th>Обя-<br/>зате-<br/>льный</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-jc/--config</code></td>
+<td><code>-</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">- </a></td>
+<td>-</td>
+<td>Путь к файлу<br/>конфигурации</td>
+</tr>
+<tr>
+<td><code>-js/--server</code></td>
+<td><code>-</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">server </a></td>
+<td>+</td>
+<td>Cервер Jira</td>
+</tr>
+<tr>
+<td><code>-jl/--login</code></td>
+<td><code>-</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">login </a></td>
+<td>+</td>
+<td>Логин в Jira</td>
+</tr>
+<tr>
+<td><code>-jp/--password</code></td>
+<td><code>-</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">password </a></td>
+<td>+</td>
+<td>Пароль в Jira</td>
+</tr>
+<tr>
+<td><code>-tl/--template</code></td>
+<td><code>-</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">issue_template </a></td>
+<td>-</td>
+<td>YAML-файл с шаблоном<br/>полей задачи</td>
+</tr>
+<tr>
+<td><code>-p/--project</code></td>
+<td><code>project.key</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">project </a></td>
+<td>+</td>
+<td>Ключ проекта</td>
+</tr>
+<tr>
+<td><code>-t/--type</code></td>
+<td><code>issuetype.name</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">- </a></td>
+<td>+</td>
+<td>Тип Issue</td>
+</tr>
+<tr>
+<td><code>-a/--assignee</code></td>
+<td><code>-</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">- </a></td>
+<td>-</td>
+<td>Исполнитель</td>
+</tr>
+<tr>
+<td><code>-s/--summary</code></td>
+<td><code>summary</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">- </a></td>
+<td>+</td>
+<td>Название задачи</td>
+</tr>
+<tr>
+<td><code>--open/--no-open</code></td>
+<td><code>-</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">open_in_browser </a></td>
+<td>+</td>
+<td>Открыть созданные<br/>задачи в браузере</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Примечание</p>
+<p>Для команды доступно автодополнение значений параметров с подгрузкой
+вариантов из Jira.
+См. раздел <a href="../installation/#включение-автодополнения-опционально">Включение автодополнения</a></p>
+</div>
+<h3 id="порядок-поиска-значений-параметров">Порядок поиска значений параметров<a class="headerlink" href="#порядок-поиска-значений-параметров" title="Permanent link">#</a></h3>
+<p>Порядок поиска значений параметров (выше - более приоритетные)</p>
+<ul>
+<li>Параметры командной строки</li>
+<li>Шаблон</li>
+<li>Конфигурационный файл (см. 
+  <a href="../configuration/#порядок-поиска-источников-конфигурации">Порядок поиска параметров источников конфигурации</a>)</li>
+<li>Запрос у пользователя (prompt-ввод). Только для обязательных параметров.</li>
+</ul>
+<p>Это означает, что при отсутствии переданного значения параметра командной
+строки, будет происходить поиск значения в шаблоне  (если был передан параметр 
+<code>-tl/--template</code> или установлен параметр <code>issue_template</code> в конфигурационном
+файле). В столбце "Путь в шаблоне" <a href="#параметры_2">таблицы параметров</a>
+указан путь в структуре шаблона, по которому будет происходить поиск параметра.</p>
+<p>Например, путь <code>assignee.name</code> извлечет из следующего шаблона значение
+<code>aleksey.alekseev</code>:</p>
+<pre><code>project:
+  key: DEV
+assignee:
+  name: aleksey.alekseev
+</code></pre>
+<p>Далее, при отсутствии параметра в шаблоне, будет произведен поиск
+параметра в конфигурационном файле. В столбце "Параметр в конфиг. файле"
+приведено название конфигурационного параметра без указания секции.
+Подробнее см. в разделе
+<a href="../configuration/#формат-конфигурационного-файла">Формат конфигурационного файла</a></p>
+<p>Далее, при отсутствии параметра в конфигурационном файле, он будет
+предложен для ввода после запуска команды (prompt-ввод), если параметр
+является обязательным.</p>
+<h3 id="примеры">Примеры<a class="headerlink" href="#примеры" title="Permanent link">#</a></h3>
+<p>Простое создание Story</p>
+<pre><code>$ jtl create-issue -t Story -s "Добавить команду создания задач"
+Created issue: http://localhost:8080/browse/DEV-123
+</code></pre>
+<p>Поля задачи могут быть заданы в шаблоне</p>
+<pre><code>$ cat issue.yaml
+labels:
+  - MyBeautifulTeam
+issuetype:
+  name: "Story"
+
+$ jtl create-issue -jt issue.yaml -s "Добавить команду создания задач"
+Created issue: http://localhost:8080/browse/DEV-123
+
+$ jtl get-issue DEV-123
+...
+summary: Добавить команду создания задач
+...
+issutype:
+  ...
+  - name: Story
+  ...
+labels:
+  - MyBeautifulTeam
+...
+</code></pre>
+<p>Путь к файлу шаблона может быть указан в конфигурационном файле</p>
+<pre><code>$ cat ~/.jtl.cfg
+[jtl.defaults.create-issue]
+template = issue.yaml
+
+$ jtl create-issue -s "Добавить функцию создания задачи"
+Created issue: http://localhost:8080/browse/DEV-123
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>CLI</th>
+<th>Config</th>
+<th>Template</th>
+<th>Required</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-jt / --template</code></td>
+<td><code>[jtl.defaults.create-issue] template</code></td>
+<td></td>
+<td>-</td>
+<td>Шаблон полей задачи</td>
+</tr>
+<tr>
+<td><code>-p / --project</code></td>
+<td><code>[jtl.defaults] project</code></td>
+<td><code>project.key</code></td>
+<td>+</td>
+<td>ID проекта</td>
+</tr>
+<tr>
+<td><code>-t / --type</code></td>
+<td>-</td>
+<td><code>issuetype.name</code></td>
+<td>+</td>
+<td>Тип задачи</td>
+</tr>
+<tr>
+<td><code>-a / --assignee</code></td>
+<td>-</td>
+<td><code>assignee.name</code></td>
+<td>-</td>
+<td>Исполнитель задачи</td>
+</tr>
+<tr>
+<td><code>-s / --summary</code></td>
+<td>-</td>
+<td><code>summary</code></td>
+<td>+</td>
+<td>Поле задачи "Тема"</td>
+</tr>
+<tr>
+<td><code>--open/--no-open</code></td>
+<td><code>[jtl.jtl.defaults.create-issue] open_in_browser</code></td>
+<td>-</td>
+<td></td>
+<td>Открыть в браузере после создания</td>
+</tr>
+</tbody>
+</table>
+<h2 id="jtl-create-issue-set">jtl create-issue-set<a class="headerlink" href="#jtl-create-issue-set" title="Permanent link">#</a></h2>
+<pre><code>$ jtl create-issue-set [OPTIONS] ISSUE_SET
+</code></pre>
+<p>Создание набора Issue из yaml-файла ISSUE_SET_FILE</p>
+<p>Пакетное создание задач</p>
+<pre><code>$ cat issues.yaml
+jtl_template:
+  project:
+    key: "DEV"
+  labels:
+    - "dreamteam"
+    - "refactoring"
+  customfield_10104: 1    # Sprint value
+jtl_issues:
+  - summary: "Refactoring the issue creation function"
+    description: "Very detailed description..."
+    issuetype:
+      name: Story
+    assignee:
+      name: "admin"
+    jtl_sub_issues:
+      - summary: "[Frontend] Refactoring the issue creation function"
+        issuetype:
+          name: Task
+        assignee:
+          name: "frontend.developer"
+      - summary: "[Backend] Refactoring the issue creation function"
+        issuetype:
+          name: Task
+        assignee:
+          name: "frontend.developer"
+
+$ jtl create-issue-set issues.yaml
+Created super-issue: http://localhost:8080/browse/DEV-13
+    Created sub-issue: http://localhost:8080/browse/DEV-14
+    Created sub-issue: http://localhost:8080/browse/DEV-15
+</code></pre>
+<h2 id="jtl-get-issue">jtl get-issue<a class="headerlink" href="#jtl-get-issue" title="Permanent link">#</a></h2>
+<pre><code>$ jtl get-issue [OPTIONS] ISSUE_ID
+</code></pre>
+<p>Получить все доступные поля задачи в формате YAML.</p>
+<div class="admonition note">
+<p class="admonition-title">Примечание</p>
+<p>Формат YAML аналогичен полю <code>fields</code> в JSON-объекте,
+асоциированном с cущностью Issue в Jira REST API, а также параметру 
+<code>fields</code> ресурса <code>Issue</code> в библиотеке <code>jira-python</code>. Cм. подробности в
+<a href="https://docs.atlassian.com/software/jira/docs/api/REST/8.13.2/">документации к Jira REST API</a>
+или <a href="https://jira.readthedocs.io/en/master/">документации к библиотеке jira-python</a></p>
+</div>
+<pre><code>    $ jtl get-issue DEV-11
+    ...
+    created: 2020-12-07T03:51:53.185+0300
+    summary: Добавить функцию создания задачи
+    issuetype:
+      description: ''
+      id: '10001'
+      name: Story
+    ...
+
+</code></pre>
+<h2 id="jtl-search-users">jtl search-users<a class="headerlink" href="#jtl-search-users" title="Permanent link">#</a></h2>
+<pre><code>$ jtl search-users [OPTIONS] [SEARCH_STRING]
+</code></pre>
+<p>Показать пользовательские логины, доступные для поля assignee.</p>
+<p>Доступна фильтрация по SEARCH_STRING.</p>
+<h3 id="параметры_3">Параметры<a class="headerlink" href="#параметры_3" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>CLI</th>
+<th>Config</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-jc/--config</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">-</a></td>
+<td>Путь к файлу конфигурации</td>
+</tr>
+<tr>
+<td><code>-js/--server</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">server</a></td>
+<td>Cервер Jira</td>
+</tr>
+<tr>
+<td><code>-jl/--login</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">login</a></td>
+<td>Логин в Jira</td>
+</tr>
+<tr>
+<td><code>-jp/--password</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">password</a></td>
+<td>Пароль в Jira</td>
+</tr>
+<tr>
+<td><code>-p/--project</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">project</a></td>
+<td>Ключ проекта</td>
+</tr>
+<tr>
+<td><code>SEARCH_STRING</code></td>
+<td><a href="../configuration/#формат-конфигурационного-файла">-</a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Поиск конкретного пользователя в проекте DEV:</p>
+<pre><code>$ jtl search-users -p DEV alek
+aleksey.alekseev (Aleksey Alekseev, aleks@localhost)
+#
+# assignee.name   a.displayName     a.emailAddress
+</code></pre>
+<p>Получение списка всех пользователей в проекте DEV:</p>
+<pre><code>$ jtl search-users -p DEV
+...
+admin (Administrator, admin@localhost)
+aleksey.alekseev (Aleksey Alekseev, alex@localhost)
+andrey.andreev (Andrey Andreev, andrey@localhost)
+...
+</code></pre>
+<h3 id="параметры_4">Параметры<a class="headerlink" href="#параметры_4" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>CLI</th>
+<th>Config</th>
+<th>Required</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-p / --project</code></td>
+<td><code>[jtl.defaults] project</code></td>
+<td>+</td>
+<td>ID проекта</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../jira/" class="btn btn-neutral float-right" title="Сведения о Jira">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../configuration/" class="btn btn-neutral" title="Конфигурация"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../configuration/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../jira/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../js/fix_table_view.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
