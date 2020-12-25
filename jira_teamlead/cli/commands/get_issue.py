@@ -16,7 +16,7 @@ def get_issue(
     jira: JiraWrapper,
     issue_id: str,
 ) -> None:
-    """Получить все доступные поля Issue по ISSUE_ID."""
+    """Получить все доступные поля задачи в формате YAML."""
     issue = jira.get_issue(issue_id=issue_id)
 
     fields = issue.raw["fields"]

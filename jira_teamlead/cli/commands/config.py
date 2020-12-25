@@ -28,7 +28,7 @@ def add_config_options(prompt: bool = True) -> Callable:
             c.SERVER_FULL,
             c.SERVER_PARAM,
             cls=ConfigOption,
-            config_params=c.SERVER_CONFIG,
+            config_parameter=c.SERVER_CONFIG,
             prompt=c.SERVER_HELP if prompt else False,
             callback=parse_server_option,
             help=c.SERVER_HELP,
@@ -38,7 +38,7 @@ def add_config_options(prompt: bool = True) -> Callable:
             c.LOGIN_FULL,
             c.LOGIN_PARAM,
             cls=ConfigOption,
-            config_params=c.LOGIN_CONFIG,
+            config_parameter=c.LOGIN_CONFIG,
             prompt=c.LOGIN_HELP if prompt else False,
             help=c.LOGIN_HELP,
         ),
@@ -47,9 +47,12 @@ def add_config_options(prompt: bool = True) -> Callable:
             c.PASSWORD_FULL,
             c.PASSWORD_PARAM,
             cls=ConfigOption,
-            config_params=c.PASSWORD_CONFIG,
-            prompt=c.PASSWORD_HELP if prompt else False,
+            config_parameter=c.PASSWORD_CONFIG,
+            prompt=c.PASSWORD_HELP + " (можно пропустить)" if prompt else False,
             hide_input=True,
+            show_default=False,
+            show_choices=False,
+            default="",
             help=c.PASSWORD_HELP,
         ),
         click.option(
@@ -57,20 +60,30 @@ def add_config_options(prompt: bool = True) -> Callable:
             c.PROJECT_FULL,
             c.PROJECT_PARAM,
             cls=ConfigOption,
-            config_params=c.PROJECT_CONFIG,
+            config_parameter=c.PROJECT_CONFIG,
             prompt=c.PROJECT_CONFIG_HELP if prompt else False,
             help=c.PROJECT_CONFIG_HELP,
         ),
         click.option(
+            c.TEMPLATE_SHORT,
+            c.TEMPLATE_FULL,
+            c.TEMPLATE_PARAM,
+            cls=ConfigOption,
+            type=click.Path(),
+            required=False,
+            config_parameter=c.TEMPLATE_CONFIG,
+            help=c.TEMPLATE_HELP,
+        ),
+        click.option(
             c.OPEN_LINK_FULL,
             c.OPEN_LINK_PARAM,
-            config_params=c.OPEN_LINK_CONFIG,
+            config_parameter=c.OPEN_LINK_CONFIG,
             is_flag=True,
             cls=ConfigOption if prompt else NoDefaultConfigOption,
             prompt=c.OPEN_LINK_CONFIG_HELP + "?" if prompt else False,
             default=True if prompt else None,
-            show_default=True if prompt else False,
-            help=c.OPEN_LINK_HELP,
+            show_default=False,
+            help=c.OPEN_LINK_CONFIG_HELP,
         ),
     ]
 
@@ -88,7 +101,7 @@ def add_config_options(prompt: bool = True) -> Callable:
 
 @click.group(name="config")
 def config_group() -> None:
-    """Управление конфигурацией"""
+    """Группа команд управления конфигурацией."""
 
 
 @config_group.command(name="init")
@@ -96,7 +109,7 @@ def config_group() -> None:
 def config_init(
     local: bool, config_values: List[ConfigValue], **kwargs: Dict[str, Any]
 ) -> None:
-    """Создать конфигурацию"""
+    """Создать (перезаписать) конфигурационный файл."""
     if local:
         config_path = get_local_config_path()
     else:
@@ -114,7 +127,7 @@ def config_init(
 def config_set(
     local: bool, config_values: List[ConfigValue], **kwargs: Dict[str, Any]
 ) -> None:
-    """Применить конфигурационный параметр(ы)"""
+    """Изменить конфигурационный параметр(ы) в конфигурационном файле."""
     if local:
         config_path = get_local_config_path()
     else:

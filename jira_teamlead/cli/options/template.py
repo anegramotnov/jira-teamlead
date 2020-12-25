@@ -1,11 +1,8 @@
 import io
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 import click
 import yaml
-
-from jira_teamlead.cli.options.constants import TEMPLATE_PARAM
-from jira_teamlead.cli.options.fallback import FallbackOption
 
 
 def parse_yaml_option(
@@ -18,7 +15,7 @@ def parse_yaml_option(
         return None
 
 
-def _get_from_template(query: str, template: dict) -> Optional[str]:
+def get_from_template(query: str, template: dict) -> Optional[str]:
     parts = query.split(".")
     if not parts:
         return None
@@ -28,14 +25,3 @@ def _get_from_template(query: str, template: dict) -> Optional[str]:
         if value is None:
             return None
     return value
-
-
-def from_template_fallback(query: str) -> Callable:
-    def fallback(ctx: click.Context, param: FallbackOption) -> Optional[str]:
-        template = ctx.params[TEMPLATE_PARAM]
-        if template is None:
-            return None
-        value = _get_from_template(query=query, template=template)
-        return value
-
-    return fallback

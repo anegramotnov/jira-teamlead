@@ -4,12 +4,8 @@ from jira_teamlead.cli.autocompletion import (
     autocompletion_with_jira,
     project_autocompletion,
 )
-from jira_teamlead.cli.options import constants
-from jira_teamlead.cli.options.config import (
-    add_config_option,
-    from_config_fallback,
-    skip_config_option,
-)
+from jira_teamlead.cli.options import constants as c
+from jira_teamlead.cli.options.config import add_config_option, skip_config_option
 from jira_teamlead.cli.options.fallback import FallbackOption
 from jira_teamlead.cli.options.jira import add_jira_options
 from jira_teamlead.jira_wrapper import JiraWrapper
@@ -17,19 +13,19 @@ from jira_teamlead.jira_wrapper import JiraWrapper
 
 @click.command()
 @add_config_option
-@add_jira_options(constants.JIRA_PARAM)
+@add_jira_options(c.JIRA_PARAM)
 @skip_config_option
 @click.option(
-    constants.PROJECT_SHORT,
-    constants.PROJECT_FULL,
-    constants.PROJECT_PARAM,
+    c.PROJECT_SHORT,
+    c.PROJECT_FULL,
+    c.PROJECT_PARAM,
     cls=FallbackOption,
     type=str,
     required=True,
     autocompletion=autocompletion_with_jira(project_autocompletion),
-    prompt=True,
-    help=constants.PROJECT_HELP,
-    fallback=from_config_fallback(*constants.PROJECT_CONFIG),
+    prompt=c.PROJECT_HELP,
+    help=c.PROJECT_HELP,
+    config_parameter=c.PROJECT_CONFIG,
 )
 @click.argument("search_string", type=str, required=False)
 def search_users(
@@ -37,7 +33,7 @@ def search_users(
     project: str,
     search_string: str,
 ) -> None:
-    """Показать логины, доступные для поля assignee.
+    """Показать пользовательские логины, доступные для поля assignee.
 
     Доступна фильтрация по SEARCH_STRING.
     """

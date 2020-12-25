@@ -4,10 +4,10 @@ from jira_teamlead.config import (
     JIRA_SECTION,
 )
 
-CONFIG_SHORT = "-jc"
-CONFIG_FULL = "--config"
-CONFIG_PARAM = "config"
-CONFIG_HELP = "Путь к файлу конфигурации"
+CONFIG_FILE_SHORT = "-jc"
+CONFIG_FILE_FULL = "--config"
+CONFIG_FILE_PARAM = "config"
+CONFIG_FILE_HELP = "Путь к файлу конфигурации"
 
 JIRA_PARAM = "jira"
 
@@ -32,7 +32,7 @@ PASSWORD_CONFIG = (JIRA_SECTION, PASSWORD_PARAM)
 TEMPLATE_SHORT = "-tl"
 TEMPLATE_FULL = "--template"
 TEMPLATE_PARAM = "issue_template"
-TEMPLATE_HELP = "Файл с шаблоном Issue"
+TEMPLATE_HELP = "YAML-файл с шаблоном полей задачи"
 TEMPLATE_CONFIG = (DEFAULTS_CREATE_ISSUE_SECTION, TEMPLATE_PARAM)
 
 PROJECT_SHORT = "-p"
@@ -51,7 +51,7 @@ OPEN_LINK_CONFIG_HELP = "Открывать созданные задачи в �
 
 LOCAL_CONFIG_FULL = "--local/--global"
 LOCAL_CONFIG_PARAM = "global"
-LOCAL_CONFIG_HELP = "Локальная конфигурация (в текущей директории)"
+LOCAL_CONFIG_HELP = "Локальный (`./`) или глобальный (`~/`) конфиг"
 
 ISSUE_TYPE_SHORT = "-t"
 ISSUE_TYPE_FULL = "--type"
@@ -63,10 +63,15 @@ ASSIGNEE_SHORT = "-a"
 ASSIGNEE_FULL = "--assignee"
 ASSIGNEE_PARAM = "assignee"
 ASSIGNEE_HELP = "Исполнитель"
+ASSIGNEE_TEMPLATE_QUERY = "assignee.name"
 
 SUMMARY_SHORT = "-s"
 SUMMARY_FULL = "--summary"
 SUMMARY_PARAM = "summary"
 SUMMARY_HELP = "Название задачи"
+SUMMARY_TEMPLATE_QUERY = "summary"
 
 CONFIG_VALUES_PARAM = "config_values"
+
+CONFIG_PARAMETER_ATTRIBUTE = "config_parameter"
+TEMPLATE_QUERY_ATTRIBUTE = "template_query"

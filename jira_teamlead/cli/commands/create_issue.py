@@ -9,87 +9,84 @@ from jira_teamlead.cli.autocompletion import (
     issue_type_autocompletion,
     project_autocompletion,
 )
-from jira_teamlead.cli.options import constants
-from jira_teamlead.cli.options.config import (
-    add_config_option,
-    from_config_fallback,
-    skip_config_option,
-)
+from jira_teamlead.cli.options import constants as c
+from jira_teamlead.cli.options.config import add_config_option, skip_config_option
 from jira_teamlead.cli.options.fallback import FallbackOption
 from jira_teamlead.cli.options.jira import add_jira_options
-from jira_teamlead.cli.options.template import from_template_fallback, parse_yaml_option
+from jira_teamlead.cli.options.template import parse_yaml_option
 from jira_teamlead.jira_wrapper import JiraWrapper
 
 
 @click.command()
 @add_config_option
-@add_jira_options(constants.JIRA_PARAM)
+@add_jira_options(c.JIRA_PARAM)
 @click.option(
-    constants.TEMPLATE_SHORT,
-    constants.TEMPLATE_FULL,
-    constants.TEMPLATE_PARAM,
+    c.TEMPLATE_SHORT,
+    c.TEMPLATE_FULL,
+    c.TEMPLATE_PARAM,
     cls=FallbackOption,
     type=click.File("r", encoding="utf-8"),
     required=False,
     callback=parse_yaml_option,
-    help=constants.TEMPLATE_HELP,
-    fallback=from_config_fallback(*constants.TEMPLATE_CONFIG),
+    help=c.TEMPLATE_HELP,
+    config_parameter=c.TEMPLATE_CONFIG,
 )
 @click.option(
-    constants.PROJECT_SHORT,
-    constants.PROJECT_FULL,
-    constants.PROJECT_PARAM,
+    c.PROJECT_SHORT,
+    c.PROJECT_FULL,
+    c.PROJECT_PARAM,
     cls=FallbackOption,
     type=str,
     required=True,
     autocompletion=autocompletion_with_jira(project_autocompletion),
-    prompt=True,
-    help=constants.PROJECT_HELP,
-    fallback=[
-        from_template_fallback(constants.PROJECT_TEMPLATE_QUERY),
-        from_config_fallback(*constants.PROJECT_CONFIG),
-    ],
+    prompt=c.PROJECT_CONFIG_HELP,
+    help=c.PROJECT_HELP,
+    template_query=c.PROJECT_TEMPLATE_QUERY,
+    config_parameter=c.PROJECT_CONFIG,
 )
 @skip_config_option
 @click.option(
-    constants.ISSUE_TYPE_SHORT,
-    constants.ISSUE_TYPE_FULL,
-    constants.ISSUE_TYPE_PARAM,
+    c.ISSUE_TYPE_SHORT,
+    c.ISSUE_TYPE_FULL,
+    c.ISSUE_TYPE_PARAM,
     cls=FallbackOption,
     type=str,
     required=True,
     autocompletion=autocompletion_with_jira(issue_type_autocompletion),
-    prompt=True,
-    help=constants.ISSUE_TYPE_HELP,
-    fallback=from_template_fallback(constants.ISSUE_TYPE_TEMPLATE_QUERY),
+    prompt=c.ISSUE_TYPE_HELP,
+    help=c.ISSUE_TYPE_HELP,
+    template_query=c.ISSUE_TYPE_TEMPLATE_QUERY,
 )
 @click.option(
-    constants.ASSIGNEE_SHORT,
-    constants.ASSIGNEE_FULL,
-    constants.ASSIGNEE_PARAM,
+    c.ASSIGNEE_SHORT,
+    c.ASSIGNEE_FULL,
+    c.ASSIGNEE_PARAM,
+    cls=FallbackOption,
     type=str,
     required=False,
     autocompletion=autocompletion_with_jira(assignee_autocompletion),
-    help=constants.ASSIGNEE_HELP,
+    help=c.ASSIGNEE_HELP,
 )
 @click.option(
-    constants.SUMMARY_SHORT,
-    constants.SUMMARY_FULL,
-    constants.SUMMARY_PARAM,
+    c.SUMMARY_SHORT,
+    c.SUMMARY_FULL,
+    c.SUMMARY_PARAM,
+    cls=FallbackOption,
     type=str,
     required=True,
-    prompt=True,
-    help=constants.SUMMARY_HELP,
+    prompt=c.SUMMARY_HELP,
+    help=c.SUMMARY_HELP,
+    template_query=c.SUMMARY_TEMPLATE_QUERY,
 )
 @click.option(
-    constants.OPEN_LINK_FULL,
-    constants.OPEN_LINK_PARAM,
+    c.OPEN_LINK_FULL,
+    c.OPEN_LINK_PARAM,
     cls=FallbackOption,
     required=True,
     default=True,
     is_flag=True,
-    help=constants.OPEN_LINK_HELP,
-    fallback=from_config_fallback(*constants.OPEN_LINK_CONFIG),
+    help=c.OPEN_LINK_HELP,
+    config_parameter=c.OPEN_LINK_CONFIG,
 )
 def create_issue(
     jira: JiraWrapper,
@@ -100,7 +97,7 @@ def create_issue(
     summary: str,
     open_in_browser: bool,
 ) -> None:
-    """Создание Issue."""
+    """Создание задачи."""
     fields = {
         "project": {
             "key": project,

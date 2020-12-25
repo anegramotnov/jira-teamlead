@@ -16,7 +16,7 @@ from jira_teamlead.jira_wrapper import JiraWrapper, SuperIssue
     "issue_set", type=click.File("r", encoding="utf-8"), callback=parse_yaml_option
 )
 def create_issue_set(jira: JiraWrapper, issue_set: dict) -> None:
-    """Создание набора Issue из yaml-файла ISSUE_SET_FILE."""
+    """Создание набора Issue из yaml-файла ISSUE_SET_FILE"""
     issues = issue_set[jtl_fields.ISSUE_SET_FIELD]
     issue_template = issue_set.get(jtl_fields.TEMPLATE_FIELD)
 

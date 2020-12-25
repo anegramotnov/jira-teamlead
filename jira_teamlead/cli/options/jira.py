@@ -4,8 +4,7 @@ from urllib.parse import urlparse
 
 import click
 
-from jira_teamlead.cli.options import constants
-from jira_teamlead.cli.options.config import from_config_fallback
+from jira_teamlead.cli.options import constants as c
 from jira_teamlead.cli.options.fallback import FallbackOption
 from jira_teamlead.jira_wrapper import JiraWrapper
 
@@ -25,46 +24,46 @@ def parse_server_option(
 
 jira_options = (
     click.option(
-        constants.SERVER_SHORT,
-        constants.SERVER_FULL,
-        constants.SERVER_PARAM,
+        c.SERVER_SHORT,
+        c.SERVER_FULL,
+        c.SERVER_PARAM,
         cls=FallbackOption,
-        fallback=from_config_fallback(*constants.SERVER_CONFIG),
+        config_parameter=c.SERVER_CONFIG,
         callback=parse_server_option,
         required=True,
-        prompt=True,
-        help=constants.SERVER_HELP,
+        prompt=c.SERVER_HELP,
+        help=c.SERVER_HELP,
     ),
     click.option(
-        constants.LOGIN_SHORT,
-        constants.LOGIN_FULL,
-        constants.LOGIN_PARAM,
+        c.LOGIN_SHORT,
+        c.LOGIN_FULL,
+        c.LOGIN_PARAM,
         cls=FallbackOption,
-        fallback=from_config_fallback(*constants.LOGIN_CONFIG),
+        config_parameter=c.LOGIN_CONFIG,
         required=True,
-        prompt=True,
-        help=constants.LOGIN_HELP,
+        prompt=c.LOGIN_HELP,
+        help=c.LOGIN_HELP,
     ),
     click.option(
-        constants.PASSWORD_SHORT,
-        constants.PASSWORD_FULL,
-        constants.PASSWORD_PARAM,
+        c.PASSWORD_SHORT,
+        c.PASSWORD_FULL,
+        c.PASSWORD_PARAM,
         cls=FallbackOption,
-        fallback=from_config_fallback(*constants.PASSWORD_CONFIG),
+        config_parameter=c.PASSWORD_CONFIG,
         required=True,
-        prompt=True,
+        prompt=c.PASSWORD_HELP,
         hide_input=True,
-        help=constants.PASSWORD_HELP,
+        help=c.PASSWORD_HELP,
     ),
 )
 
 
 def set_jira_to_params(params: dict) -> JiraWrapper:
-    server = params.pop(constants.SERVER_PARAM)
-    login = params.pop(constants.LOGIN_PARAM)
-    password = params.pop(constants.PASSWORD_PARAM)
+    server = params.pop(c.SERVER_PARAM)
+    login = params.pop(c.LOGIN_PARAM)
+    password = params.pop(c.PASSWORD_PARAM)
     jira = JiraWrapper(server=server, auth=(login, password))
-    params[constants.JIRA_PARAM] = jira
+    params[c.JIRA_PARAM] = jira
     return jira
 
 

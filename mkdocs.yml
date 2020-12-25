@@ -1,0 +1,24 @@
+site_name: Jira TeamLead
+nav:
+  - Jira TeamLead: index.md
+  - Установка: installation.md
+  - Быстрый старт: quickstart.md
+  - Конфигурация: configuration.md
+  - Команды: commands.md
+  - Сведения о Jira: jira.md
+  - Дорожная карта: roadmap.md
+theme:
+  name: readthedocs
+  highlightjs: false
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: "#"
+      slugify: !!python/name:pymdownx.slugs.uslugify
+  - pymdownx.tasklist
+extra_javascript: [js/fix_table_view.js]
+plugins:
+  - search
+  - macros:
+      include_dir: docs/include
+      module_name: docs/mkdocs_macros/__init__

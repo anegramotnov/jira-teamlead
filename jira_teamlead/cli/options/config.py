@@ -4,7 +4,6 @@ from typing import Any, Callable, List, NamedTuple, Optional, Tuple, Union
 import click
 
 from jira_teamlead.cli.options import constants
-from jira_teamlead.cli.options.fallback import FallbackOption
 from jira_teamlead.config import Config, get_suitable_config
 
 
@@ -18,13 +17,13 @@ def parse_config_option(
 def add_config_option(f: Callable) -> Callable:
     """Добавить опцию конфига."""
     config_option = click.option(
-        constants.CONFIG_SHORT,
-        constants.CONFIG_FULL,
-        constants.CONFIG_PARAM,
+        constants.CONFIG_FILE_SHORT,
+        constants.CONFIG_FILE_FULL,
+        constants.CONFIG_FILE_PARAM,
         type=click.Path(exists=True, dir_okay=False),
         required=False,
         callback=parse_config_option,
-        help=constants.CONFIG_HELP,
+        help=constants.CONFIG_FILE_HELP,
     )
     f = config_option(f)
     return f
@@ -38,27 +37,11 @@ def skip_config_option(f: Callable) -> Callable:
     """
 
     def wrapper(*args: Any, **kwargs: Any) -> Any:
-        kwargs.pop(constants.CONFIG_PARAM)
+        kwargs.pop(constants.CONFIG_FILE_PARAM)
         result = f(*args, **kwargs)
         return result
 
     return update_wrapper(wrapper, f)
-
-
-def from_config_fallback(section: str, option: str) -> Callable:
-    def fallback(ctx: click.Context, param: FallbackOption) -> Optional[str]:
-        config: Optional[Config] = ctx.params[constants.CONFIG_PARAM]
-        if config is None:
-            return None
-        value = config.get(section=section, option=option)
-        if value is not None:
-            # for override e.param_hint
-            param.fallback_hint = "'{0}.{1}' (from {2})".format(
-                config.get_full_section_name(section), option, config.path
-            )
-        return value
-
-    return fallback
 
 
 class ConfigValue(NamedTuple):
@@ -68,15 +51,14 @@ class ConfigValue(NamedTuple):
 
 
 class ConfigOption(click.Option):
-    config_params: Tuple[str, str]
+    config_parameter: Tuple[str, str]
 
     def __init__(
         self,
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        config_params = kwargs.pop("config_params")
-        self.config_params = config_params
+        self.config_parameter = kwargs.pop(constants.CONFIG_PARAMETER_ATTRIBUTE)
 
         super().__init__(*args, **kwargs)
 
@@ -85,7 +67,7 @@ class ConfigOption(click.Option):
     ) -> Tuple[Any, List[str]]:
         value, args = super().handle_parse_result(ctx, opts, args)
         config_values = ctx.params.setdefault(constants.CONFIG_VALUES_PARAM, [])
-        if value is not None:
-            config_values.append(ConfigValue(*self.config_params, value))
+        if value:
+            config_values.append(ConfigValue(*self.config_parameter, value))
 
         return value, args
