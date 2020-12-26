@@ -1,0 +1,8 @@
+project:
+  key: OVERRIDED_BY_TEMPLATE
+issuetype:
+  name: "Issue Type From Template"
+summary: "summary from template"
+assignee:
+  name: login_from_template
+customfield_10100: 1

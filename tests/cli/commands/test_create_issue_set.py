@@ -5,9 +5,7 @@ from unittest import mock
 from jira_teamlead.cli import create_issue_set
 
 
-@mock.patch("jira_teamlead.cli.options.jira.JiraWrapper")
-def test_create_issue_set(JIRA_MOCK, cli, datadir):
-    jira_mock = JIRA_MOCK.return_value
+def test_create_issue_set(jira_mock, cli, datadir):
     jira_mock.server = "http://lol.wut"
 
     issue_mock = mock.MagicMock()

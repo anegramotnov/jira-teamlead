@@ -3,15 +3,12 @@ from unittest import mock
 from jira_teamlead.cli import search_users
 
 
-@mock.patch("jira_teamlead.cli.options.jira.JiraWrapper")
-def test_search_users(JIRA_MOCK, cli):
+def test_search_users(jira_mock, cli):
 
     user_1 = mock.MagicMock()
     user_1.name = "test"
     user_1.displayName = "Test test"
     user_1.emailAddress = "email at lol dot wut"
-
-    jira_mock = JIRA_MOCK.return_value
 
     jira_mock.search_users.return_value = [user_1]
 
