@@ -4,7 +4,7 @@ from jira_teamlead.cli import create_issue
 
 
 @mock.patch("jira_teamlead.cli.options.jira.JiraWrapper")
-def test_create_issue(JIRA_MOCK, runner):
+def test_create_issue(JIRA_MOCK, cli):
     jira_mock = JIRA_MOCK.return_value
 
     issue_mock = mock.MagicMock()
@@ -13,7 +13,7 @@ def test_create_issue(JIRA_MOCK, runner):
     jira_mock.create_issue.return_value = issue_mock
     with mock.patch("jira_teamlead.config.Config.get") as get_from_config:
         get_from_config.return_value = None
-        result = runner.invoke(
+        result = cli.invoke(
             create_issue,
             [
                 "-js",

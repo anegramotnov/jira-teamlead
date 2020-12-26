@@ -57,9 +57,6 @@ class Config:
     def get_full_section_name(self, section: str) -> str:
         return "{0}.{1}".format(self.SECTION_PREFIX, section)
 
-    def try_get_bool(self, value: str) -> bool:
-        pass
-
     def get(self, section: str, option: str) -> Optional[str]:
         full_section_name = self.get_full_section_name(section)
 

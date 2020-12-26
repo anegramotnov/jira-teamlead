@@ -3,6 +3,7 @@ from click.testing import CliRunner
 
 
 @pytest.fixture()
-def runner() -> CliRunner:
+def cli():
     runner = CliRunner()
-    return runner
+    with runner.isolated_filesystem():
+        yield runner

@@ -25,10 +25,10 @@ class ConfigFallbackMixin(click.Option):
         super().__init__(*args, **kwargs)
 
     def value_from_config(self, ctx: click.Context) -> Optional[str]:
-        config: Optional[Config] = ctx.params[c.CONFIG_FILE_PARAM]
-        if config is None:
-            return None
         if self.config_parameter is None:
+            return None
+        config: Optional[Config] = ctx.params.get(c.CONFIG_FILE_PARAM)
+        if config is None:
             return None
         value = config.get(*self.config_parameter)
         if value is not None:
@@ -76,11 +76,10 @@ class TemplateFallbackMixin(click.Option):
         value = get_from_template(query=self.template_query, template=template)
         if value is not None:
             self.from_template = True
-
         return value
 
-    def get_param_hint(self) -> Optional[str]:
-        raise NotImplementedError
+    # def get_param_hint(self) -> Optional[str]:
+    #     raise NotImplementedError
 
 
 class FallbackOption(ConfigFallbackMixin, TemplateFallbackMixin):

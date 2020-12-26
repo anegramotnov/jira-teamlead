@@ -1,0 +1,9 @@
+jtl_template:
+  project:
+    key: "LOL"
+jtl_issues:
+  - summary: "Test Summary"
+    issuetype:
+      name: Lol
+    jtl_sub_issues:
+      - summary: "Test Sub Summary"

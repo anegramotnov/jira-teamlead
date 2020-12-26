@@ -4,7 +4,7 @@ from jira_teamlead.cli import search_users
 
 
 @mock.patch("jira_teamlead.cli.options.jira.JiraWrapper")
-def test_search_users(JIRA_MOCK, runner):
+def test_search_users(JIRA_MOCK, cli):
 
     user_1 = mock.MagicMock()
     user_1.name = "test"
@@ -15,7 +15,7 @@ def test_search_users(JIRA_MOCK, runner):
 
     jira_mock.search_users.return_value = [user_1]
 
-    result = runner.invoke(
+    result = cli.invoke(
         search_users, ["-js", "http://lol.wut", "-jl", "lol", "-jp", "wut", "-p", "LOL"]
     )
     assert result.exit_code == 0

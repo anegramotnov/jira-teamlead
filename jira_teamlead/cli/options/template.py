@@ -17,8 +17,6 @@ def parse_yaml_option(
 
 def get_from_template(query: str, template: dict) -> Optional[str]:
     parts = query.split(".")
-    if not parts:
-        return None
     value: Any = template
     for part in parts:
         value = value.get(part)
