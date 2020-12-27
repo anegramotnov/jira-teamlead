@@ -9,12 +9,13 @@ from jira_teamlead.cli.autocompletion import (
     issue_type_autocompletion,
     project_autocompletion,
 )
+from jira_teamlead.cli.exceptions import raise_jira_response_error
 from jira_teamlead.cli.options import constants as c
 from jira_teamlead.cli.options.config import add_config_option, skip_config_option
 from jira_teamlead.cli.options.fallback import FallbackOption
 from jira_teamlead.cli.options.jira import add_jira_options
 from jira_teamlead.cli.options.template import parse_yaml_option
-from jira_teamlead.jira_wrapper import JiraWrapper
+from jira_teamlead.jira_wrapper import JiraErrorWrapper, JiraWrapper
 
 
 @click.command()
@@ -61,7 +62,6 @@ from jira_teamlead.jira_wrapper import JiraWrapper
     c.ASSIGNEE_SHORT,
     c.ASSIGNEE_FULL,
     c.ASSIGNEE_PARAM,
-    cls=FallbackOption,
     type=str,
     required=False,
     autocompletion=autocompletion_with_jira(assignee_autocompletion),
@@ -88,7 +88,9 @@ from jira_teamlead.jira_wrapper import JiraWrapper
     help=c.OPEN_LINK_HELP,
     config_parameter=c.OPEN_LINK_CONFIG,
 )
+@click.pass_context
 def create_issue(
+    ctx: click.Context,
     jira: JiraWrapper,
     issue_template: Optional[dict],
     project: str,
@@ -111,9 +113,11 @@ def create_issue(
     if assignee is not None:
         assignee_field = {"assignee": {"name": assignee}}
         fields.update(assignee_field)
-
-    created_issue = jira.create_issue(fields=fields, template=issue_template)
-
-    click.echo(f"Created issue: {created_issue.link}")
-    if open_in_browser:
-        webbrowser.open_new_tab(created_issue.link)
+    try:
+        created_issue = jira.create_issue(fields=fields, template=issue_template)
+    except JiraErrorWrapper as e:
+        raise_jira_response_error(jira_error_wrapper=e, ctx=ctx)
+    else:
+        click.echo(f"Created issue: {created_issue.link}")
+        if open_in_browser:
+            webbrowser.open_new_tab(created_issue.link)

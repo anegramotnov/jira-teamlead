@@ -36,22 +36,6 @@ class ConfigFallbackMixin(click.Option):
             self.from_config = True
         return value
 
-    def get_param_hint(self) -> Optional[str]:
-        if (
-            isinstance(self, ConfigFallbackMixin)
-            and self.config_parameter is not None
-            and self.from_config
-            and self.config is not None
-        ):
-            hint = "'{0}.{1}' (from {2})".format(
-                self.config.get_full_section_name(self.config_parameter[0]),
-                self.config_parameter[1],
-                self.config.path,
-            )
-            return hint
-        else:
-            return None
-
 
 class TemplateFallbackMixin(click.Option):
     template_query: Optional[str] = None
@@ -78,9 +62,6 @@ class TemplateFallbackMixin(click.Option):
             self.from_template = True
         return value
 
-    # def get_param_hint(self) -> Optional[str]:
-    #     raise NotImplementedError
-
 
 class FallbackOption(ConfigFallbackMixin, TemplateFallbackMixin):
     fallback_required: bool = False
@@ -90,7 +71,7 @@ class FallbackOption(ConfigFallbackMixin, TemplateFallbackMixin):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        self.fallback_required = kwargs.pop("required")
+        self.fallback_required = kwargs.pop("required", False)
 
         super().__init__(*args, **kwargs)
 
@@ -106,17 +87,24 @@ class FallbackOption(ConfigFallbackMixin, TemplateFallbackMixin):
             value = ctx.lookup_default(self.name)
         return value
 
-    def handle_parse_result(self, ctx: click.Context, opts: dict, args: list) -> Any:
-        try:
-            return super().handle_parse_result(ctx, opts, args)
-        except click.BadParameter as e:
-            param_hint = self.get_param_hint()
-            if param_hint is not None:
-                e.param_hint = param_hint
-            raise
-
     def full_process_value(self, ctx: click.Context, value: Any) -> Any:
         value = super().full_process_value(ctx, value)
         if self.fallback_required and self.value_is_missing(value):
             raise click.MissingParameter(ctx=ctx, param=self)
         return value
+
+    def get_error_hint(self, ctx: Optional[click.Context]) -> str:
+        if self.template_query and self.from_template:
+            return "'{0}' (from template)".format(self.template_query)
+        if (
+            self.config_parameter is not None
+            and self.from_config
+            and self.config is not None
+        ):
+            hint = "'{0}.{1}' (from {2})".format(
+                self.config.get_full_section_name(self.config_parameter[0]),
+                self.config_parameter[1],
+                self.config.path,
+            )
+            return hint
+        return super().get_error_hint(ctx)  # type: ignore[arg-type]

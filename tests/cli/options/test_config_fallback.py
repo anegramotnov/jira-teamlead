@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from jira_teamlead.cli.options.fallback import ConfigFallbackMixin
+from jira_teamlead.cli.options.fallback import ConfigFallbackMixin, FallbackOption
 
 
 @pytest.fixture
@@ -18,22 +18,22 @@ def ctx_mock():
 @pytest.mark.parametrize(
     "option_kwargs,expected_param_hint",
     (
-        ({}, None),
+        ({}, "'--test'"),
         (
             {"config_parameter": ("section", "parameter")},
             "'mock_full_section.parameter' (from mock_config_path)",
         ),
     ),
 )
-def test_get_param_hint(option_kwargs, expected_param_hint):
-    config_fallback = ConfigFallbackMixin(["--test"], **option_kwargs)
+def test_get_error_hint(option_kwargs, expected_param_hint):
+    config_fallback = FallbackOption(["--test"], **option_kwargs)
     config_fallback.from_config = True
     config_mock = mock.MagicMock()
     config_mock.path = "mock_config_path"
     config_mock.get_full_section_name.return_value = "mock_full_section"
     config_fallback.config = config_mock
 
-    param_hint = config_fallback.get_param_hint()
+    param_hint = config_fallback.get_error_hint(ctx=mock.MagicMock())
 
     assert param_hint == expected_param_hint
 

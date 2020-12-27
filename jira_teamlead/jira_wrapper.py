@@ -1,5 +1,6 @@
 import dataclasses
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar
+import json
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 import jira.resources
 from jira.client import JIRA
@@ -100,6 +101,41 @@ class Project:
         )
 
 
+class JiraErrorWrapper(Exception):
+    message: str
+    status_code: int
+    response: Optional[Union[dict, str]]
+
+    def __init__(
+        self,
+        message: str,
+        status_code: int,
+        response: Optional[Union[dict, str]],
+    ) -> None:
+        super().__init__(message)
+
+        self.message = message
+        self.status_code = status_code
+        self.response = response
+
+    @staticmethod
+    def _get_response(raw: Optional[str]) -> Optional[Union[dict, str]]:
+        if raw is None or not raw:
+            return None
+        try:
+            return json.loads(raw)
+        except json.decoder.JSONDecodeError:
+            return raw
+
+    @classmethod
+    def get_from_jira(cls, jira_error: jira.JIRAError) -> "JiraErrorWrapper":
+        return cls(
+            message=jira_error.text,
+            status_code=jira_error.status_code,
+            response=cls._get_response(jira_error.response.text),
+        )
+
+
 class JiraWrapper:
     jira: JIRA
     server: str
@@ -112,7 +148,11 @@ class JiraWrapper:
 
     def __init__(self, server: str, auth: Tuple[str, str]) -> None:
         self.server = server
-        self.jira = JIRA(server=self.server, auth=auth)
+        try:
+            self.jira = JIRA(server=self.server, basic_auth=auth)
+        except jira.JIRAError as e:
+            # TODO: catch it
+            raise e
 
     def create_issue(self, fields: dict, template: Optional[dict] = None) -> Issue:
         """Создать Issue."""
@@ -120,7 +160,12 @@ class JiraWrapper:
             original_fields=fields, template_fields=template
         )
 
-        issue_resource = self.jira.create_issue(**issue_fields)
+        try:
+            issue_resource = self.jira.create_issue(**issue_fields)
+        except jira.JIRAError as e:
+            raise JiraErrorWrapper.get_from_jira(
+                jira_error=e,
+            )
 
         issue = Issue.from_resource(issue_resource=issue_resource, server=self.server)
 
@@ -231,8 +276,13 @@ class JiraWrapper:
         return users
 
     def get_issue(self, issue_id: str) -> Issue:
-        issue_resource = self.jira.issue(id=issue_id)
 
+        try:
+            issue_resource = self.jira.issue(id=issue_id)
+        except jira.JIRAError as e:
+            raise JiraErrorWrapper.get_from_jira(
+                jira_error=e,
+            )
         issue = Issue.from_resource(issue_resource=issue_resource, server=self.server)
 
         return issue

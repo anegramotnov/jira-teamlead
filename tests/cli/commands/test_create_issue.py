@@ -5,6 +5,7 @@ from unittest import mock
 import pytest
 
 from jira_teamlead.cli import create_issue
+from jira_teamlead.jira_wrapper import JiraErrorWrapper
 
 minimal_expected_fields = {
     "project": {"key": "TSTPRJ"},
@@ -211,4 +212,56 @@ def test_with_template(cli, jira_with_issue, datadir):
             "assignee": {"name": "login_from_template"},
             "customfield_10100": 1,
         },
+    )
+
+
+def test_jira_error(cli, jira_mock, datadir):
+    shutil.copy(datadir / "default_config.cfg", Path() / ".jtl.cfg")
+
+    jira_mock.create_issue.side_effect = JiraErrorWrapper(
+        message="test error message",
+        status_code=404,
+        response={"errorMessages": ["test error message1"]},
+    )
+
+    params = [
+        "--type",
+        "Test Issue Type",
+        "--summary",
+        "test task",
+    ]
+
+    result = cli.invoke(create_issue, params)
+
+    assert result.exit_code == 3
+    assert "Jira REST API Error (404 Not Found):" in result.output
+    assert "test error message1" in result.output
+
+
+def test_jira_field_error(cli, jira_mock, datadir):
+    shutil.copy(datadir / "default_config.cfg", Path() / ".jtl.cfg")
+
+    jira_mock.create_issue.side_effect = JiraErrorWrapper(
+        message="test error message2",
+        status_code=400,
+        response={
+            "errorMessages": [],
+            "errors": {"summary": "field error message"},
+        },
+    )
+
+    params = [
+        "--type",
+        "Test Issue Type",
+        "--summary",
+        "test task",
+    ]
+
+    result = cli.invoke(create_issue, params)
+
+    assert result.exit_code == 3
+    assert "Jira REST API Error (400 Bad Request):" in result.output
+    assert (
+        "Invalid value for field '-s' / '--summary': \"field error message\""
+        in result.output
     )
