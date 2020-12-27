@@ -25,7 +25,7 @@
 
 ## Создайте первую задачу
 
-С помощью задания обязательных опций вручную
+С помощью задания обязательных параметров вручную
 
     $ jtl create-issue --type Task --summary "My First Task"
     
@@ -33,7 +33,7 @@
     
     $ jtl create-issue --t Task --s "My First Task"
     
-Или без опций (обязательные будут запрошены после запуска командой)
+Или без параметров (обязательные параметры будут запрошены после запуска)
 
     $ jtl create-issue
 
@@ -52,7 +52,7 @@
 {% include "admonitions/issue_yaml_note.md" %}
 
 Теперь можно не указывать тип задачи при создании, если указать шаблон в
-опциях командной строки
+параметрах командной строки
     
     $ jtl create-issue --template issue_template.yaml --summary "My First Templated Task"
     
@@ -74,7 +74,7 @@
     issue_template = issue_template.yaml
     ...
 
-Теперь можно создавать задачи без указания опции `-t / --type`
+Теперь можно создавать задачи без указания параметра `-t / --type`
 
     $ jtl create-issue -s "My First Templated Task"
     
