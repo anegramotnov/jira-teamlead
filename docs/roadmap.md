@@ -75,6 +75,11 @@
             - [ ] Кеширование
     - [ ] Параметр `--dry-run`
 - [ ] Идеи
+    - [ ] Добавить в документацию сравнение с: ручным созданием, csv-импортом,
+          jira templates, прочими jira-cli
+    - [ ] Добавить ссылку на https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/#creating-an-issue-examples
+    - [ ] Добавить команду валидации, как в визарде csv-импорта в Jira
+    - [ ] Добавить ipssue-id, parent-id и т.д., как в csv-импорте
     - [ ] Динамические параметры CLI с подгрузкой опций с помощью
           autocompleteUrl из createmeta
     - [ ] Какой-нибудь trace_id в описании или специальном поле для возможности
