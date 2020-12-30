@@ -1,6 +1,6 @@
 from unittest import mock
 
-from jira_teamlead.jira_wrapper import JiraWrapper, SubIssue, SuperIssue
+from jira_teamlead.jira_wrapper import Jira, SubIssue, SuperIssue
 
 
 @mock.patch("jira_teamlead.jira_wrapper.JIRA")
@@ -19,10 +19,10 @@ def test_create_issue_set(JIRA_MOCK):
 
     jira_mock.create_issue.side_effect = [super_issue, sub_issue]
 
-    jira_wrapper = JiraWrapper(server="http://lol.wut", auth=("lol", "wut"))
+    jira_wrapper = Jira(server="http://lol.wut", auth=("lol", "wut"))
 
     result = jira_wrapper.create_issue_set(
-        issues=[
+        issue_set=[
             {
                 "summary": "Test issue",
                 "issuetype": "Story",
@@ -35,7 +35,6 @@ def test_create_issue_set(JIRA_MOCK):
                 ],
             }
         ],
-        template={"project": {"key": "LOL"}},
     )
 
     assert len(result) == 1

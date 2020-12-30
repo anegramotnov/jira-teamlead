@@ -5,9 +5,13 @@ import click
 
 from jira_teamlead.cli.options import constants as c
 from jira_teamlead.cli.options.config import ConfigOption, ConfigValue
-from jira_teamlead.cli.options.jira import parse_server_option
+from jira_teamlead.cli.options.jira import (
+    get_jira_kwargs_by_params,
+    parse_server_option,
+)
 from jira_teamlead.cli.options.no_default_flag import NoDefaultFlagOption
 from jira_teamlead.config import Config, get_global_config_path, get_local_config_path
+from jira_teamlead.jira_wrapper import Jira
 
 
 class NoDefaultConfigOption(NoDefaultFlagOption, ConfigOption):
@@ -107,9 +111,12 @@ def config_group() -> None:
 @config_group.command(name="init")
 @add_config_options(prompt=True)
 def config_init(
-    local: bool, config_values: List[ConfigValue], **kwargs: Dict[str, Any]
+    local: bool, config_values: List[ConfigValue], **params: Dict[str, Any]
 ) -> None:
     """Создать (перезаписать) конфигурационный файл."""
+    jira_kwargs = get_jira_kwargs_by_params(params=params, clean=False)
+    Jira.check_authentication(**jira_kwargs)
+
     if local:
         config_path = get_local_config_path()
     else:
@@ -125,7 +132,7 @@ def config_init(
 @config_group.command(name="set")
 @add_config_options(prompt=False)
 def config_set(
-    local: bool, config_values: List[ConfigValue], **kwargs: Dict[str, Any]
+    local: bool, config_values: List[ConfigValue], **params: Dict[str, Any]
 ) -> None:
     """Изменить конфигурационный параметр(ы) в конфигурационном файле."""
     if local:

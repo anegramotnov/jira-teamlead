@@ -5,7 +5,7 @@ import click
 from click._compat import get_text_stderr
 
 from jira_teamlead.cli.options.fallback import FallbackOption
-from jira_teamlead.jira_wrapper import JiraErrorWrapper
+from jira_teamlead.jira_wrapper import JiraError
 
 
 class JiraFieldError(NamedTuple):
@@ -104,7 +104,7 @@ def get_fallback_param_from_ctx(
 
 # TODO: убрать специфическую обработку полей создания задачи из общей функции
 def raise_jira_response_error(
-    jira_error_wrapper: JiraErrorWrapper, ctx: click.Context
+    jira_error_wrapper: JiraError, ctx: click.Context
 ) -> None:
     if isinstance(jira_error_wrapper.response, dict):
         jira_response_error = JiraResponseError(

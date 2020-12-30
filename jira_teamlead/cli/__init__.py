@@ -6,7 +6,7 @@ from jira_teamlead.cli.commands.create_issue_set import create_issue_set
 from jira_teamlead.cli.commands.get_issue import get_issue
 from jira_teamlead.cli.commands.search_users import search_users
 
-context_settings = dict(max_content_width=120)  # noqa: C408
+context_settings = dict(max_content_width=120)
 
 
 @click.group(context_settings=context_settings)

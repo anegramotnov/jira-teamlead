@@ -21,7 +21,7 @@ def ctx_mock():
         ({}, "'--test'"),
         (
             {"config_parameter": ("section", "parameter")},
-            "'mock_full_section.parameter' (from mock_config_path)",
+            "'mock_full_section.parameter = mock_value' (from mock_config_path)",
         ),
     ),
 )
@@ -31,9 +31,13 @@ def test_get_error_hint(option_kwargs, expected_param_hint):
     config_mock = mock.MagicMock()
     config_mock.path = "mock_config_path"
     config_mock.get_full_section_name.return_value = "mock_full_section"
+
     config_fallback.config = config_mock
 
-    param_hint = config_fallback.get_error_hint(ctx=mock.MagicMock())
+    ctx_mock = mock.MagicMock()
+    ctx_mock.params = {"test": "mock_value"}
+
+    param_hint = config_fallback.get_error_hint(ctx=ctx_mock)
 
     assert param_hint == expected_param_hint
 

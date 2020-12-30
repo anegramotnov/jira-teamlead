@@ -6,6 +6,8 @@ import jira.resources
 from jira.client import JIRA
 
 from jira_teamlead import jtl_fields
+from jira_teamlead.issue_template import inherit_fields
+from jira_teamlead.type_aliases import IssueFieldsT
 
 T_Issue = TypeVar("T_Issue", bound="Issue")
 
@@ -101,7 +103,7 @@ class Project:
         )
 
 
-class JiraErrorWrapper(Exception):
+class JiraError(Exception):
     message: str
     status_code: int
     response: Optional[Union[dict, str]]
@@ -128,7 +130,7 @@ class JiraErrorWrapper(Exception):
             return raw
 
     @classmethod
-    def get_from_jira(cls, jira_error: jira.JIRAError) -> "JiraErrorWrapper":
+    def get_from_jira(cls, jira_error: jira.JIRAError) -> "JiraError":
         return cls(
             message=jira_error.text,
             status_code=jira_error.status_code,
@@ -136,7 +138,7 @@ class JiraErrorWrapper(Exception):
         )
 
 
-class JiraWrapper:
+class Jira:
     jira: JIRA
     server: str
 
@@ -146,24 +148,49 @@ class JiraWrapper:
     ----
     {description}"""
 
-    def __init__(self, server: str, auth: Tuple[str, str]) -> None:
+    @classmethod
+    def check_authentication(cls, server: str, auth: Tuple[str, str]) -> None:
+        try:
+            JIRA(
+                server=server,
+                basic_auth=auth,
+                validate=True,
+                get_server_info=True,
+                max_retries=0,
+            )
+        except jira.JIRAError as e:
+            raise JiraError.get_from_jira(
+                jira_error=e,
+            )
+
+    def __init__(self, server: str, auth: Tuple[str, str], fast: bool = False) -> None:
         self.server = server
         try:
-            self.jira = JIRA(server=self.server, basic_auth=auth)
+            if fast:
+                self.jira = JIRA(
+                    server=self.server,
+                    basic_auth=auth,
+                    max_retries=0,
+                    get_server_info=False,
+                    validate=False,
+                )
+            else:
+                self.jira = JIRA(
+                    server=self.server,
+                    auth=auth,
+                    max_retries=1,
+                    get_server_info=True,
+                    validate=True,
+                )
         except jira.JIRAError as e:
-            # TODO: catch it
-            raise e
+            raise JiraError.get_from_jira(jira_error=e)
 
-    def create_issue(self, fields: dict, template: Optional[dict] = None) -> Issue:
+    def create_issue(self, fields: dict) -> Issue:
         """Создать Issue."""
-        issue_fields = self._override_from_template(
-            original_fields=fields, template_fields=template
-        )
-
         try:
-            issue_resource = self.jira.create_issue(**issue_fields)
+            issue_resource = self.jira.create_issue(**fields)
         except jira.JIRAError as e:
-            raise JiraErrorWrapper.get_from_jira(
+            raise JiraError.get_from_jira(
                 jira_error=e,
             )
 
@@ -173,29 +200,22 @@ class JiraWrapper:
 
     def create_issue_set(
         self,
-        issues: List[dict],
-        template: Optional[dict] = None,
+        issue_set: List[IssueFieldsT],
+        # template: Optional[dict] = None,
     ) -> List[Issue]:
-        templated_issues: List[Issue] = []
-
-        for original_issue_fields in issues:
-
-            issue_fields = self._override_from_template(
-                original_fields=original_issue_fields,
-                template_fields=template,
-            )
-
+        issues: List[Issue] = []
+        for issue_fields in issue_set:
             if jtl_fields.SUB_ISSUE_FIELD in issue_fields:
                 sub_issues = issue_fields.pop(jtl_fields.SUB_ISSUE_FIELD)
                 super_issue = self.create_super_issue(
                     fields=issue_fields, sub_issues=sub_issues
                 )
-                templated_issues.append(super_issue)
+                issues.append(super_issue)
             else:
                 issue = self.create_issue(fields=issue_fields)
-                templated_issues.append(issue)
+                issues.append(issue)
 
-        return templated_issues
+        return issues
 
     def create_super_issue(self, fields: dict, sub_issues: List[dict]) -> SuperIssue:
         """Создать задачу, содержащее подзадачи."""
@@ -215,16 +235,16 @@ class JiraWrapper:
 
         return super_issue
 
-    def _override_from_template(
-        self, original_fields: dict, template_fields: Optional[dict] = None
-    ) -> dict:
-        if template_fields is None:
-            return original_fields
-
-        fields: dict = {}
-        fields.update(template_fields)
-        fields.update(original_fields)
-        return fields
+    # def _override_from_template(
+    #     self, original_fields: dict, template_fields: Optional[dict] = None
+    # ) -> dict:
+    #     if template_fields is None:
+    #         return original_fields
+    #
+    #     fields: dict = {}
+    #     fields.update(template_fields)
+    #     fields.update(original_fields)
+    #     return fields
 
     def _update_sub_issue_description(
         self, sub_issue_fields: dict, super_issue_key: str
@@ -235,21 +255,14 @@ class JiraWrapper:
         )
         sub_issue_fields[self.DESCRIPTION_FIELD] = new_description
 
-    def _override_from_super_issue(
-        self, sub_issue_fields: dict, super_issue_fields: dict
-    ) -> dict:
-        new_fields = {}
-        new_fields.update(super_issue_fields)
-        new_fields.update(sub_issue_fields)
-        return new_fields
-
     def create_sub_issue(
-        self, fields: dict, super_issue_key: str, super_issue_fields: dict
+        self,
+        fields: IssueFieldsT,
+        super_issue_key: str,
+        super_issue_fields: IssueFieldsT,
     ) -> SubIssue:
         """Создать подзадачу, относящуюся к задаче."""
-        sub_issue_fields = self._override_from_super_issue(
-            sub_issue_fields=fields, super_issue_fields=super_issue_fields
-        )
+        sub_issue_fields = inherit_fields(fields=fields, base=super_issue_fields)
 
         self._update_sub_issue_description(
             sub_issue_fields=sub_issue_fields, super_issue_key=super_issue_key
@@ -280,7 +293,7 @@ class JiraWrapper:
         try:
             issue_resource = self.jira.issue(id=issue_id)
         except jira.JIRAError as e:
-            raise JiraErrorWrapper.get_from_jira(
+            raise JiraError.get_from_jira(
                 jira_error=e,
             )
         issue = Issue.from_resource(issue_resource=issue_resource, server=self.server)

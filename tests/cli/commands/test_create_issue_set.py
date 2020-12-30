@@ -17,17 +17,25 @@ def test_create_issue_set(jira_mock, cli, datadir):
 
     result = cli.invoke(
         create_issue_set,
-        ["-js", "http://lol.wut", "-jl", "lol", "-jp", "wut", "test_issues.yaml"],
+        [
+            "-js",
+            "http://lol.wut",
+            "-jl",
+            "lol",
+            "-jp",
+            "wut",
+            "--no-open",
+            "test_issues.yaml",
+        ],
     )
     assert result.exit_code == 0
     assert result.output == "Created issue: http://lol.wut/browse/LOL-1\n"
     jira_mock.create_issue_set.assert_called_once_with(
-        issues=[
+        issue_set=[
             {
                 "summary": "Test Summary",
                 "issuetype": {"name": "Lol"},
                 "jtl_sub_issues": [{"summary": "Test Sub Summary"}],
             }
         ],
-        template={"project": {"key": "LOL"}},
     )

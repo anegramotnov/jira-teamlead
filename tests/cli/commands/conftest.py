@@ -13,8 +13,8 @@ def cli():
 
 @pytest.fixture
 def jira_mock():
-    with mock.patch("jira_teamlead.cli.options.jira.JiraWrapper") as JiraWrapper:
-        jira_mock = JiraWrapper.return_value
+    with mock.patch("jira_teamlead.cli.options.jira.Jira") as Jira:
+        jira_mock = Jira.return_value
         yield jira_mock
 
 

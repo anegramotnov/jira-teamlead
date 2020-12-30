@@ -8,7 +8,7 @@ from jira_teamlead.cli.options import constants as c
 from jira_teamlead.cli.options.config import add_config_option, skip_config_option
 from jira_teamlead.cli.options.fallback import FallbackOption
 from jira_teamlead.cli.options.jira import add_jira_options
-from jira_teamlead.jira_wrapper import JiraWrapper
+from jira_teamlead.jira_wrapper import Jira
 
 
 @click.command()
@@ -29,7 +29,7 @@ from jira_teamlead.jira_wrapper import JiraWrapper
 )
 @click.argument("search_string", type=str, required=False)
 def search_users(
-    jira: JiraWrapper,
+    jira: Jira,
     project: str,
     search_string: str,
 ) -> None:

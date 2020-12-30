@@ -9,7 +9,7 @@ DEFAULT_CONFIG_FILENAME = ".jtl.cfg"
 
 
 def get_local_config_path() -> Path:
-    config_path = Path().absolute() / DEFAULT_CONFIG_FILENAME
+    config_path = Path() / DEFAULT_CONFIG_FILENAME
     return config_path
 
 

@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from jira_teamlead.cli import create_issue
-from jira_teamlead.jira_wrapper import JiraErrorWrapper
+from jira_teamlead.jira_wrapper import JiraError
 
 minimal_expected_fields = {
     "project": {"key": "TSTPRJ"},
@@ -115,7 +115,6 @@ def test_options(
 
     jira_with_issue.create_issue.assert_called_once_with(
         fields=expected_fields,
-        template=None,
     )
 
 
@@ -158,7 +157,6 @@ def test_with_config(cli, jira_with_issue, datadir, params, config_name):
             "issuetype": {"name": "Test Issue Type"},
             "summary": "test task",
         },
-        template=None,
     )
 
 
@@ -184,7 +182,6 @@ def test_override_project_by_params(cli, jira_with_issue, datadir):
             "issuetype": {"name": "Test Issue Type"},
             "summary": "test task",
         },
-        template=None,
     )
 
 
@@ -192,7 +189,7 @@ def test_with_template(cli, jira_with_issue, datadir):
     shutil.copy(datadir / "default_config.cfg", Path() / ".jtl.cfg")
     shutil.copy(datadir / "param_template.yaml", Path() / "param_template.yaml")
 
-    params = ["--template", "param_template.yaml", "--summary", "summary from options"]
+    params = ["--template", "param_template.yaml", "--summary", "summary from cli"]
 
     result = cli.invoke(create_issue, params)
 
@@ -203,12 +200,7 @@ def test_with_template(cli, jira_with_issue, datadir):
         fields={
             "project": {"key": "OVERRIDED_BY_TEMPLATE"},
             "issuetype": {"name": "Issue Type From Template"},
-            "summary": "summary from options",
-        },
-        template={
-            "project": {"key": "OVERRIDED_BY_TEMPLATE"},
-            "issuetype": {"name": "Issue Type From Template"},
-            "summary": "summary from template",
+            "summary": "summary from cli",
             "assignee": {"name": "login_from_template"},
             "customfield_10100": 1,
         },
@@ -218,7 +210,7 @@ def test_with_template(cli, jira_with_issue, datadir):
 def test_jira_error(cli, jira_mock, datadir):
     shutil.copy(datadir / "default_config.cfg", Path() / ".jtl.cfg")
 
-    jira_mock.create_issue.side_effect = JiraErrorWrapper(
+    jira_mock.create_issue.side_effect = JiraError(
         message="test error message",
         status_code=404,
         response={"errorMessages": ["test error message1"]},
@@ -241,7 +233,7 @@ def test_jira_error(cli, jira_mock, datadir):
 def test_jira_field_error(cli, jira_mock, datadir):
     shutil.copy(datadir / "default_config.cfg", Path() / ".jtl.cfg")
 
-    jira_mock.create_issue.side_effect = JiraErrorWrapper(
+    jira_mock.create_issue.side_effect = JiraError(
         message="test error message2",
         status_code=400,
         response={

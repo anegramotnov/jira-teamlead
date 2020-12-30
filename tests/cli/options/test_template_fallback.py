@@ -1,8 +1,10 @@
+from pathlib import Path
 from unittest import mock
 
 import pytest
 
 from jira_teamlead.cli.options.fallback import TemplateFallbackMixin
+from jira_teamlead.issue_template import IssueTemplate
 
 
 @pytest.fixture
@@ -35,7 +37,7 @@ def test_value_from_template_value_is_none(ctx_mock):
         ["--test"], template_query="template.query"
     )
 
-    ctx_mock.params = {"issue_template": {}}
+    ctx_mock.params = {"issue_template": IssueTemplate(path=Path(), fields={})}
 
     value = template_fallback.value_from_template(ctx_mock)
 
@@ -47,7 +49,11 @@ def test_value_from_template_is_none(ctx_mock):
         ["--test"], template_query="template.query"
     )
 
-    ctx_mock.params = {"issue_template": {"template": {"query": "mock_value"}}}
+    ctx_mock.params = {
+        "issue_template": IssueTemplate(
+            path=Path(), fields={"template": {"query": "mock_value"}}
+        )
+    }
 
     value = template_fallback.value_from_template(ctx_mock)
 

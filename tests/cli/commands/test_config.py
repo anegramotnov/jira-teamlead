@@ -6,6 +6,14 @@ import pytest
 from jira_teamlead.cli.commands.config import config_init, config_set
 
 
+@pytest.fixture
+def check_authentication():
+    with mock.patch(
+        "jira_teamlead.cli.commands.config.Jira.check_authentication"
+    ) as check_authentication:
+        yield check_authentication
+
+
 @pytest.mark.parametrize("command", (config_init, config_set))
 def test_required_config_location_flag(cli, command):
     result = cli.invoke(command)
@@ -13,7 +21,7 @@ def test_required_config_location_flag(cli, command):
     assert "Missing option '--local' / '--global'." in result.output
 
 
-def test_init_required_options_ok(cli, datadir):
+def test_init_required_options_ok(cli, check_authentication, datadir):
     options = [
         "--local",
         "--server",
@@ -35,7 +43,7 @@ def test_init_required_options_ok(cli, datadir):
 
 
 @mock.patch("jira_teamlead.cli.commands.config.get_global_config_path")
-def test_init_global_ok(get_global_config_path, cli, datadir):
+def test_init_global_ok(get_global_config_path, cli, check_authentication, datadir):
     get_global_config_path.return_value = Path() / ".jtl.cfg"
 
     options = [
@@ -58,7 +66,7 @@ def test_init_global_ok(get_global_config_path, cli, datadir):
     assert local_config.read_text() == reference_config.read_text()
 
 
-def test_init_all_options_ok(cli, datadir):
+def test_init_all_options_ok(cli, check_authentication, datadir):
     options = [
         "--local",
         "--server",
@@ -82,7 +90,7 @@ def test_init_all_options_ok(cli, datadir):
     assert local_config.read_text() == reference_config.read_text()
 
 
-def test_set_template(cli, datadir):
+def test_set_template(cli, check_authentication, datadir):
     init_options = [
         "--local",
         "--server",

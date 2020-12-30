@@ -3,8 +3,8 @@ from typing import Any, Optional, Tuple
 import click
 
 from jira_teamlead.cli.options import constants as c
-from jira_teamlead.cli.options.template import get_from_template
 from jira_teamlead.config import Config
+from jira_teamlead.issue_template import IssueTemplate
 
 
 class ConfigFallbackMixin(click.Option):
@@ -39,6 +39,7 @@ class ConfigFallbackMixin(click.Option):
 
 class TemplateFallbackMixin(click.Option):
     template_query: Optional[str] = None
+    template: Optional[IssueTemplate] = None
     from_template: bool = False
 
     def __init__(
@@ -54,11 +55,14 @@ class TemplateFallbackMixin(click.Option):
     def value_from_template(self, ctx: click.Context) -> Optional[str]:
         if self.template_query is None:
             return None
-        template = ctx.params.get(c.TEMPLATE_PARAM)
+        template: Optional[IssueTemplate] = ctx.params.get(c.TEMPLATE_PARAM)
         if template is None:
             return None
-        value = get_from_template(query=self.template_query, template=template)
+
+        value = template.get(query=self.template_query)
+
         if value is not None:
+            self.template = template
             self.from_template = True
         return value
 
@@ -93,18 +97,23 @@ class FallbackOption(ConfigFallbackMixin, TemplateFallbackMixin):
             raise click.MissingParameter(ctx=ctx, param=self)
         return value
 
-    def get_error_hint(self, ctx: Optional[click.Context]) -> str:
-        if self.template_query and self.from_template:
-            return "'{0}' (from template)".format(self.template_query)
+    def get_error_hint(self, ctx: click.Context) -> str:
+        value = ctx.params[self.name]
+
+        if self.template_query and self.from_template and self.template is not None:
+            return "'{0}: {1}' (from {2})".format(
+                self.template_query, value, self.template.path
+            )
         if (
             self.config_parameter is not None
             and self.from_config
             and self.config is not None
         ):
-            hint = "'{0}.{1}' (from {2})".format(
+            hint = "'{0}.{1} = {2}' (from {3})".format(
                 self.config.get_full_section_name(self.config_parameter[0]),
                 self.config_parameter[1],
+                value,
                 self.config.path,
             )
             return hint
-        return super().get_error_hint(ctx)  # type: ignore[arg-type]
+        return super().get_error_hint(ctx)

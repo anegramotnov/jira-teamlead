@@ -6,7 +6,7 @@ import click
 
 from jira_teamlead.cli.options import constants as c
 from jira_teamlead.cli.options.fallback import FallbackOption
-from jira_teamlead.jira_wrapper import JiraWrapper
+from jira_teamlead.jira_wrapper import Jira
 
 
 def parse_server_option(
@@ -58,13 +58,12 @@ jira_options = (
 )
 
 
-def set_jira_to_params(params: dict) -> JiraWrapper:
-    server = params.pop(c.SERVER_PARAM)
-    login = params.pop(c.LOGIN_PARAM)
-    password = params.pop(c.PASSWORD_PARAM)
-    jira = JiraWrapper(server=server, auth=(login, password))
-    params[c.JIRA_PARAM] = jira
-    return jira
+def get_jira_kwargs_by_params(params: dict, clean: bool) -> dict:
+    server = params.pop(c.SERVER_PARAM) if clean else params[c.SERVER_PARAM]
+    login = params.pop(c.LOGIN_PARAM) if clean else params[c.LOGIN_PARAM]
+    password = params.pop(c.PASSWORD_PARAM) if clean else params[c.PASSWORD_PARAM]
+
+    return dict(server=server, auth=(login, password))
 
 
 def add_jira_options(name: str) -> Callable:
@@ -78,9 +77,13 @@ def add_jira_options(name: str) -> Callable:
         for option in reversed(jira_options):
             f = option(f)
 
-        def wrapper(**kwargs: Any) -> Any:
-            set_jira_to_params(kwargs)
-            f(**kwargs)
+        def wrapper(**params: Any) -> Any:
+
+            jira_kwargs = get_jira_kwargs_by_params(params=params, clean=True)
+
+            params[c.JIRA_PARAM] = Jira(fast=False, **jira_kwargs)
+
+            f(**params)
 
         return update_wrapper(wrapper, f)
 

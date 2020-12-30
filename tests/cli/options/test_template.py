@@ -1,8 +1,10 @@
+from pathlib import Path
+
 import pytest
 
-from jira_teamlead.cli.options.template import get_from_template
+from jira_teamlead.issue_template import IssueTemplate
 
-default_template = {
+template_fields = {
     "project": {
         "key": "TEST",
     },
@@ -24,5 +26,8 @@ default_template = {
     ),
 )
 def test_get_template_ok(query, expected_result):
-    result = get_from_template(query=query, template=default_template)
+    template = IssueTemplate(path=Path(), fields=template_fields)
+
+    result = template.get(query=query)
+
     assert result == expected_result

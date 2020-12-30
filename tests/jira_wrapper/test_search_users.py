@@ -1,6 +1,6 @@
 from unittest import mock
 
-from jira_teamlead.jira_wrapper import JiraWrapper
+from jira_teamlead.jira_wrapper import Jira
 
 
 @mock.patch("jira_teamlead.jira_wrapper.JIRA")
@@ -25,7 +25,7 @@ def test_search_users(JIRA_MOCK):
 
     jira_mock.search_assignable_users_for_issues.return_value = [user_1, user_2]
 
-    jira_wrapper = JiraWrapper(server="http://lol.wut", auth=("lol", "wut"))
+    jira_wrapper = Jira(server="http://lol.wut", auth=("lol", "wut"))
 
     result = jira_wrapper.search_users(project="LOL")
 

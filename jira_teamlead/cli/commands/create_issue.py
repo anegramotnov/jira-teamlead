@@ -1,5 +1,5 @@
 import webbrowser
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import click
 
@@ -14,8 +14,11 @@ from jira_teamlead.cli.options import constants as c
 from jira_teamlead.cli.options.config import add_config_option, skip_config_option
 from jira_teamlead.cli.options.fallback import FallbackOption
 from jira_teamlead.cli.options.jira import add_jira_options
-from jira_teamlead.cli.options.template import parse_yaml_option
-from jira_teamlead.jira_wrapper import JiraErrorWrapper, JiraWrapper
+from jira_teamlead.cli.options.template import IssueTemplateType
+from jira_teamlead.jira_wrapper import Jira, JiraError
+
+if TYPE_CHECKING:
+    from jira_teamlead.issue_template import IssueTemplate
 
 
 @click.command()
@@ -26,9 +29,8 @@ from jira_teamlead.jira_wrapper import JiraErrorWrapper, JiraWrapper
     c.TEMPLATE_FULL,
     c.TEMPLATE_PARAM,
     cls=FallbackOption,
-    type=click.File("r", encoding="utf-8"),
+    type=IssueTemplateType(),
     required=False,
-    callback=parse_yaml_option,
     help=c.TEMPLATE_HELP,
     config_parameter=c.TEMPLATE_CONFIG,
 )
@@ -91,8 +93,8 @@ from jira_teamlead.jira_wrapper import JiraErrorWrapper, JiraWrapper
 @click.pass_context
 def create_issue(
     ctx: click.Context,
-    jira: JiraWrapper,
-    issue_template: Optional[dict],
+    jira: Jira,
+    issue_template: Optional["IssueTemplate"],
     project: str,
     issue_type: str,
     assignee: Optional[str],
@@ -113,9 +115,13 @@ def create_issue(
     if assignee is not None:
         assignee_field = {"assignee": {"name": assignee}}
         fields.update(assignee_field)
+
+    if issue_template is not None:
+        fields = issue_template.apply_template(issue_fields=fields)
+
     try:
-        created_issue = jira.create_issue(fields=fields, template=issue_template)
-    except JiraErrorWrapper as e:
+        created_issue = jira.create_issue(fields=fields)
+    except JiraError as e:
         raise_jira_response_error(jira_error_wrapper=e, ctx=ctx)
     else:
         click.echo(f"Created issue: {created_issue.link}")
